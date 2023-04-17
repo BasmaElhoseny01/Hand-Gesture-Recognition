@@ -1,0 +1,21 @@
+ORB [first paper approach]*
+LBP
+-------------------------------------
+Paper2:Hand-Gesture Recognition-Algorithm based on Finger Counting
+-Limitations solved like Hand accessories
+
+---------------------------------------
+Paper4:Hand Gesture Recognition for Human Computer Interaction
+-Uses Convex Hall
+-Repo with the same idea of Convex Hall :https://github.com/aakashjhawar/hand-gesture-recognition
+ -----------------------------------------------------------
+Paper5:Gesture Feature Extraction for Static Gesture Recognition
+-Features Extraction
+
+------------------------------------------------------------------------
+Links:
+1.https://www.linkedin.com/pulse/hand-gesture-recognition-using-ml-algorithms-sreeshti-singh/?trk=pulse-article_more-articles_related-content-card
+2.https://github.com/Gogul09/gesture-recognition
+	2.1.https://gogulilango.com/software/hand-gesture-recognition-p1
+	2.2.https://gogulilango.com/software/hand-gesture-recognition-p2
+3.https://www.linkedin.com/pulse/hand-gesture-recognition-using-image-processing-feature-anmol-mittal/ ***
