@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 def show_images(images, titles=None):
     """
     This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
