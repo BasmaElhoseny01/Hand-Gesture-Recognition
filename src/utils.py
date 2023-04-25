@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from skimage.exposure import histogram
+from matplotlib.pyplot import bar
 
 def show_images(images, titles=None):
     """
@@ -47,3 +49,20 @@ def read_image(path,color_space="RGB"):
     if(color_space=="RGB"):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
+
+
+
+# Show Histogram of Gray Scale image
+def showHist(img):
+    """
+    Function to how Histogram of Gray Scale image
+
+    @param path: relative path to the image
+    @param color_space:space of in which we want the image
+
+    @return image read in the passed space
+    """
+    # An "interface" to matplotlib.axes.Axes.hist() method
+    plt.figure()
+    imgHist = histogram(img, nbins=256)
+    bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
