@@ -1,12 +1,14 @@
 # Imports
 import math
-
 import cv2
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from skimage.exposure import histogram
 from matplotlib.pyplot import bar
+
+import os
+
 
 def show_images(images, titles=None):
     """
@@ -16,7 +18,7 @@ def show_images(images, titles=None):
 
     @return None
     """
-    # 
+    #
     # images[0] will be drawn with the title titles[0] if exists
     # You aren't required to understand this function, use it as-is.
     n_ims = len(images)
@@ -33,10 +35,10 @@ def show_images(images, titles=None):
         n += 1
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
     plt.show()
-
     return None
 
-def read_image(path,color_space="RGB"):
+
+def read_image(path, color_space="RGB"):
     """
     Function to read image from a given path and returns image in a specific space
 
@@ -46,10 +48,9 @@ def read_image(path,color_space="RGB"):
     @return image read in the passed space
     """
     image = cv2.imread(path)
-    if(color_space=="RGB"):
+    if (color_space == "RGB"):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
-
 
 
 # Show Histogram of Gray Scale image
