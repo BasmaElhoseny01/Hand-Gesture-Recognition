@@ -92,3 +92,38 @@ def skin_masks(img_bgr, name="", debug=False):
     #             YCrCb_mask, ], ['RGB'+name, 'Mask(3)YCrCb'])
 
     return YCrCb_mask
+
+
+def ditch_specular(img_bgr):
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    # Apply a median blur to reduce noise
+    blur = cv2.medianBlur(gray, 3)
+    # Apply a threshold to obtain the specular mask
+    # _, mask = cv2.threshold(blur, 240, 255, cv2.THRESH_BINARY_INV)
+    # Perform morphological operations to remove small objects and fill holes
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    mask = cv2.morphologyEx(blur, cv2.MORPH_GRADIENT, kernel)
+    # Apply the mask to the original image to remove the specular component
+    result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
+    return result
+
+def clahe(img_bgr):
+    grayscale = cv2.cvtColor(img_bgr,cv2.COLOR_BGR2GRAY)
+    #Apply contrast limiting adaptive histogram equalization
+    clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(5,5))
+    cl1 = clahe.apply(grayscale)
+    # Apply a threshold to obtain the specular mask
+    _, mask = cv2.threshold(cl1, 240, 255, cv2.THRESH_BINARY_INV)
+    # Perform morphological operations to remove small objects and fill holes
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+    # Apply the mask to the original image to remove the specular component
+    result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
+    return result
+
+def gamma_trans(img, gamma):
+    gamma_table=[np.power(x/255.0,gamma)*255.0 for x in range(256)]
+    gamma_table=np.round(np.array(gamma_table)).astype(np.uint8)
+    return cv2.LUT(img,gamma_table)
