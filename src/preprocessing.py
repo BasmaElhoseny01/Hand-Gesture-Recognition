@@ -2,12 +2,17 @@ from utils import *
 import utils
 
 
-def preprocessing(img, name="", debug=False):
+def preprocessing(img, name="", debug=False, gamma=False, close=False):
     '''
     @parm img:BGR Scale img
     '''
+    if(gamma):
+        img=gamma_trans(img,4)    #WORKING
     skin = skin_masks(img, name, debug)
-
+    
+    if(close):
+        kernel = np.ones((5, 5), np.uint8)
+        skin = cv2.morphologyEx(skin, cv2.MORPH_CLOSE, kernel, iterations=10)
     # Find Contours
     contours, hierarchy = cv2.findContours(
         skin, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
@@ -102,7 +107,7 @@ def ditch_specular(img_bgr):
     # Apply a threshold to obtain the specular mask
     # _, mask = cv2.threshold(blur, 240, 255, cv2.THRESH_BINARY_INV)
     # Perform morphological operations to remove small objects and fill holes
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 10))
     mask = cv2.morphologyEx(blur, cv2.MORPH_GRADIENT, kernel)
     # Apply the mask to the original image to remove the specular component
     result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
@@ -111,13 +116,13 @@ def ditch_specular(img_bgr):
 def clahe(img_bgr):
     grayscale = cv2.cvtColor(img_bgr,cv2.COLOR_BGR2GRAY)
     #Apply contrast limiting adaptive histogram equalization
-    clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(5,5))
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(5,50))
     cl1 = clahe.apply(grayscale)
     # Apply a threshold to obtain the specular mask
     _, mask = cv2.threshold(cl1, 240, 255, cv2.THRESH_BINARY_INV)
     # Perform morphological operations to remove small objects and fill holes
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 15))
+    mask = cv2.morphologyEx(cl1, cv2.MORPH_OPEN, kernel)
 
     # Apply the mask to the original image to remove the specular component
     result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
@@ -127,3 +132,8 @@ def gamma_trans(img, gamma):
     gamma_table=[np.power(x/255.0,gamma)*255.0 for x in range(256)]
     gamma_table=np.round(np.array(gamma_table)).astype(np.uint8)
     return cv2.LUT(img,gamma_table)
+
+def detect_exposure(img):
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    hist, bins = np.histogram(img_gray, bins=256, range=(0, 255))
+    print(hist)
