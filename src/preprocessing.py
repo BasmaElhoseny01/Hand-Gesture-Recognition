@@ -6,11 +6,11 @@ def preprocessing(img, name="", debug=False, gamma=False, close=False):
     '''
     @parm img:BGR Scale img
     '''
-    if(gamma):
-        img=gamma_trans(img,4)    #WORKING
+    if (gamma):
+        img = gamma_trans(img, 4)  # WORKING
     skin = skin_masks(img, name, debug)
-    
-    if(close):
+
+    if (close):
         kernel = np.ones((5, 5), np.uint8)
         skin = cv2.morphologyEx(skin, cv2.MORPH_CLOSE, kernel, iterations=10)
     # Find Contours
@@ -113,10 +113,11 @@ def ditch_specular(img_bgr):
     result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
     return result
 
+
 def clahe(img_bgr):
-    grayscale = cv2.cvtColor(img_bgr,cv2.COLOR_BGR2GRAY)
-    #Apply contrast limiting adaptive histogram equalization
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(5,50))
+    grayscale = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    # Apply contrast limiting adaptive histogram equalization
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(5, 50))
     cl1 = clahe.apply(grayscale)
     # Apply a threshold to obtain the specular mask
     _, mask = cv2.threshold(cl1, 240, 255, cv2.THRESH_BINARY_INV)
@@ -128,10 +129,12 @@ def clahe(img_bgr):
     result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
     return result
 
+
 def gamma_trans(img, gamma):
-    gamma_table=[np.power(x/255.0,gamma)*255.0 for x in range(256)]
-    gamma_table=np.round(np.array(gamma_table)).astype(np.uint8)
-    return cv2.LUT(img,gamma_table)
+    gamma_table = [np.power(x/255.0, gamma)*255.0 for x in range(256)]
+    gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
+    return cv2.LUT(img, gamma_table)
+
 
 def detect_exposure(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
