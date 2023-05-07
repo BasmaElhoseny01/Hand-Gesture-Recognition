@@ -10,6 +10,7 @@ def extract_features(img, debug=False):
 # SIFT
 # SURF
 
+
 def Harris(img, debug=False):
     '''
     img:"grey"
@@ -23,12 +24,15 @@ def Harris(img, debug=False):
     sift = cv2.SIFT_create()
 
     # Detect and compute SIFT descriptors for Harris corners
+    # Normalize
+    harris_img = cv2.normalize(
+        harris_img, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
     keypoints, descriptors = sift.detectAndCompute(harris_img, None)
 
     if (debug):
-        output_image = cv2.drawKeypoints(img, keypoints, 0, (0, 0, 255),
+        output_image = cv2.drawKeypoints(img, keypoints, 0, (255, 0, 0),
                                          flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
-        show_images([output_image])
+        show_images([output_image], ['Key points'])
 
     return descriptors
 
