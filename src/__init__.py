@@ -1,6 +1,4 @@
 from utils import *
-from preprocessing import *
-from rembg import remove
 
 
 def main():
