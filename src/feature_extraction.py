@@ -1,16 +1,40 @@
 from utils import *
 
 
-def extract_features():
-    return None
+def extract_features(img, debug=False):
 
+    # Corner Ha
+    return Harris(img, debug)
 
 # ORB
 # SIFT
 # SURF
 
+def Harris(img, debug=False):
+    '''
+    img:"grey"
+    '''
+    block_size = 2
+    aperture_size = 3
+    k = 0.04
+    harris_img = cv2.cornerHarris(img, block_size, aperture_size, k)
 
-# CORNER DETECTION 
+    # Create SIFT descriptor
+    sift = cv2.SIFT_create()
+
+    # Detect and compute SIFT descriptors for Harris corners
+    keypoints, descriptors = sift.detectAndCompute(harris_img, None)
+
+    if (debug):
+        output_image = cv2.drawKeypoints(img, keypoints, 0, (0, 0, 255),
+                                         flags=cv2.DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS)
+        show_images([output_image])
+
+    return descriptors
+
+# CORNER DETECTION
+
+
 def detectCorners(filename):
     # read the image
     img = cv2.imread(filename)
@@ -21,13 +45,13 @@ def detectCorners(filename):
 
     # convert image to gray scale image
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
+
     # detect corners with the goodFeaturesToTrack function.
     corners = cv2.goodFeaturesToTrack(gray, 0, 0.8, 10)
     corners = np.int0(corners)
     # print(corners[0][0])
     corners_detected = []
-    # we iterate through each corner, 
+    # we iterate through each corner,
     # making a circle at each point that we think is a corner.
     for corner in corners:
         x, y = corner.ravel()
@@ -39,11 +63,11 @@ def detectCorners(filename):
         thickness = 10
 
         img = cv2.circle(img, centre, radius, color, thickness)
-    
+
     corners_detected = np.asarray(corners_detected)
 
     # print(corners_detected)
-    
+
     # plt.imshow(img), plt.show()
 
     return corners_detected
