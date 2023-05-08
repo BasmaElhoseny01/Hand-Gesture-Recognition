@@ -5,21 +5,21 @@ import splitfolders
 
 
 
-def simplified_data_set():
+def simplified_data_set(ratio=8):
 
 
     for i in range(0,6):
         source ='./data/men/'+str(i)
         destination ='./data_simple/men/'+str(i)
-        pick_random(source,destination)
+        pick_random(source,destination,int(ratio))
 
     for i in range(0,6):
         source ='./data/women/'+str(i)
         destination ='./data_simple/women/'+str(i)
-        pick_random(source,destination)
+        pick_random(source,destination,int(ratio))
 
       
-def pick_random(source,destination):
+def pick_random(source,destination,ratio=8):
 
     isExist = os.path.exists(destination)
     if not isExist:
@@ -29,7 +29,7 @@ def pick_random(source,destination):
     shutil.rmtree(destination, ignore_errors=False, onerror=None)
     os.mkdir(destination)
     onlyfiles = [f for f in os.listdir(source) if os.path.isfile(os.path.join(source, f))]
-    no_of_files = round((len(onlyfiles)/8))
+    no_of_files = round((len(onlyfiles)/ratio))
     for i in range(no_of_files):
         files = [filenames for (filenames) in os.listdir(source)]
         random_file = random.choice(files)
@@ -39,11 +39,23 @@ def pick_random(source,destination):
 
 def split_data_simple():
     input_folder='./data_simple/men'
-    splitfolders.ratio(input_folder,output="./data_simple/split/men",seed=42,ratio=(.7,.2,.1),group_prefix=None)
+    output_folder="./data_simple/split/men"
+
+    isExist = os.path.exists(output_folder)
+    if  isExist:
+        shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
+        os.makedirs(output_folder)
+    splitfolders.ratio(input_folder,output=output_folder,seed=42,ratio=(.7,.2,.1),group_prefix=None)
 
 
     input_folder='./data_simple/women'
-    splitfolders.ratio(input_folder,output="./data_simple/split/women",seed=42,ratio=(.7,.2,.1),group_prefix=None)
+    output_folder="./data_simple/split/women"
+
+    isExist = os.path.exists(output_folder)
+    if  isExist:
+        shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
+        os.makedirs(output_folder)
+    splitfolders.ratio(input_folder,output=output_folder,seed=42,ratio=(.7,.2,.1),group_prefix=None)
     return None
 
 def main(argv):
@@ -69,8 +81,8 @@ def main(argv):
             # print(currentArgument)
     
             if currentArgument in ("-s", "--simple"):
-                print("Generating Simple Data Set")
-                simplified_data_set()
+                print("Generating Simple Data Set Ratio: ",values[0])
+                simplified_data_set(values[0])
                 return
             
             

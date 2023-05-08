@@ -7,24 +7,24 @@ from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-def train_randomforest(x, y):
+def train_randomforest(X_train,y_train,X_test,y_test):
     # Split the dataset into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
     # Create a Random Forest classifier with 100 trees
     rf = RandomForestClassifier(n_estimators=100, random_state=42, criterion='log_loss')
 
     # Fit the classifier to the training data
-    rf.fit(x, y)
+    rf.fit(X_train, y_train)
 
     # Predict the labels of the test data
-    y_pred = rf.predict(x)
+    y_pred = rf.predict(X_test)
 
-    return y_pred
+    return y_pred, y_test
 
-def train_svm(x,y):
+def train_svm(X_train,y_train,X_test,y_test):
     # Split the dataset into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
     # Create an SVM classifier with a linear kernel
     clf = svm.SVC(kernel='linear')

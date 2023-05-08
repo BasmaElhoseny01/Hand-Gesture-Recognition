@@ -9,6 +9,7 @@ from matplotlib.pyplot import bar
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 
+import shutil
 import os
 
 
@@ -69,3 +70,49 @@ def showHist(img):
     plt.figure()
     imgHist = histogram(img, nbins=256)
     bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
+
+
+def kmeans_visual_words(k, descriptor_list,n_init=1):
+    """
+    Get Visual Words
+    @param k:number of clusters
+    @param descriptor_list: list  of all classes of all images
+    @n_init:????
+
+    @return visual_words: (*K) centroids of the k clusters   case SIFT (128*K) :)
+    """
+    kmeans = KMeans(n_clusters = k, n_init=n_init)
+    kmeans.fit(descriptor_list)
+    visual_words = kmeans.cluster_centers_ 
+    return visual_words
+
+def findClosestCentroids(X, centroids):
+    """
+    Returns the closest centroids in idx for a dataset X
+    where each row is a single example. idx = m x 1 vector
+    of centroid assignments (i.e. each entry in range [1..K])
+    Args:
+        X        : array(# training examples, n)
+        centroids: array(K, n)
+    Returns:
+        idx      : array(# training examples, 1)
+    """
+    # Set K size.
+    K = centroids.shape[0]
+    count_clusters=np.zeros((K,1))
+    
+
+    # Initialise idx.
+    idx = np.zeros((X.shape[0], 1), dtype=np.int8)
+
+    # Alternative partial vectorized solution.
+    # Iterate over training examples.
+    for i in range(X.shape[0]):
+        distances = np.linalg.norm(X[i] - centroids, axis=1)
+        # argmin returns the indices of the minimum values along an axis,
+        # replacing the need for a for-loop and if statement.
+        min_dst = np.argmin(distances)
+        idx[i] = min_dst
+        count_clusters[min_dst]+=1
+
+    return idx,count_clusters

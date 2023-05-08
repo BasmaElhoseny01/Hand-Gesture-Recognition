@@ -1,3 +1,5 @@
 data/
-outputs/preprocessing_output/men
-outputs/preprocessing_output/women
+data_simple/
+preprocessing_output/
+Test Algorithms images/
+test_data/
