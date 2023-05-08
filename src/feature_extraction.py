@@ -1,7 +1,32 @@
 from utils import *
 
+def extract_features(directory_path, num_of_clusters=3, debug=False):
+    all_feature_descriptors = []
+    all_expected_classes = []
 
-def extract_features(path_of_the_directory, classification, debug=False):
+    for i in range(0, 6):
+        if(debug):
+            print(i)
+        result_dir_path = directory_path + 'men/' + str(i) + '/'
+        feature_descriptors, expexted_classes = descript_features(path_of_the_directory=result_dir_path, classification=i)
+        for fd in feature_descriptors:
+            all_feature_descriptors.append(fd)
+        for ec in expexted_classes:
+            all_expected_classes.append(ec)
+    for i in range(0, 6):
+        if(debug):
+            print(i)
+        result_dir_path = directory_path + 'women/' + str(i) + '/'
+        feature_descriptors, expexted_classes = descript_features(path_of_the_directory=result_dir_path, classification=i)
+        for fd in feature_descriptors:
+            all_feature_descriptors.append(fd)
+        for ec in expexted_classes:
+            all_expected_classes.append(ec)
+    feature_vector = cluster_descriptors(all_feature_descriptors, num_of_clusters)
+
+    return feature_vector, all_expected_classes
+
+def descript_features(path_of_the_directory, classification, debug=False):
     feature_descriptor = []     # size: i * n * 128 , i is the number of images, n is the number of key points
     expected_class = []         # List of len = i, i is the number of images
 
@@ -17,7 +42,7 @@ def extract_features(path_of_the_directory, classification, debug=False):
 # SIFT
 # SURF
 
-def cluster_descriptors(feature_descriptor, expected, num_of_clusters=3):
+def cluster_descriptors(feature_descriptor, num_of_clusters=3):
     #Get the descriptors of the found key points in the images
     descriptors = [j for k in feature_descriptor if k is not None for j in k]   #Cleaner version
     num_of_images = len(feature_descriptor)

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from skimage.exposure import histogram
 from matplotlib.pyplot import bar
 from sklearn.cluster import KMeans
+from sklearn.metrics import accuracy_score
 
 import os
 
