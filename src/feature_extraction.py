@@ -36,9 +36,8 @@ def Harris(img, debug=False):
 
     return descriptors
 
+
 # CORNER DETECTION
-
-
 def detectCorners(filename):
     # read the image
     img = cv2.imread(filename)
