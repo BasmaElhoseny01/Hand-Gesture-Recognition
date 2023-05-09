@@ -33,7 +33,7 @@ def pick_random(source,destination,ratio=8):
     for i in range(no_of_files):
         files = [filenames for (filenames) in os.listdir(source)]
         random_file = random.choice(files)
-        shutil.move(f'{source}\\{random_file}', destination)
+        shutil.copy(f'{source}\\{random_file}', destination)
 
     return None
 

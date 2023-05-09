@@ -13,7 +13,7 @@ import shutil
 import os
 
 
-def show_images(images, titles=None):
+def show_images(images, titles=None,save=False,path_save=""):
     """
     This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
     @param images :array of images to be shown
@@ -37,7 +37,10 @@ def show_images(images, titles=None):
         a.set_title(title)
         n += 1
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
-    plt.show()
+    if(save):
+        plt.savefig(path_save)
+    else:
+        plt.show()
     return None
 
 
@@ -116,3 +119,15 @@ def findClosestCentroids(X, centroids):
         count_clusters[min_dst]+=1
 
     return idx,count_clusters
+
+
+def draw_keypoints(img, keypoints, color=(255),radius=8,thickness=-1):
+    # Convert Gray Scale to RGB ti be able to draw on it colors
+    img=cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    
+
+    for kp in keypoints:
+        x, y = kp.pt
+        cv2.circle(img, (int(x), int(y)), color=color, radius=radius, thickness=thickness) # you can change the radius and the thickness
+
+    return img

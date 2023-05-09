@@ -8,6 +8,8 @@ def preprocessing(img, name="", debug=False, gamma=False, close=False):
     '''
     if (gamma):
         img = gamma_trans(img, 4)  # WORKING
+
+    #Skin Mask
     skin = skin_masks(img, name, debug)
 
     if (close):
