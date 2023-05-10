@@ -1,6 +1,24 @@
 from utils import *
 import utils
 
+def pre(img):
+    # img1 = cv2.imread(path)
+    img_hsv=cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # H=img_hsv[:,:,0]
+    S=img_hsv[:,:,1]
+    # V=img_hsv[:,:,2]
+
+    # print(np.min(S))
+    # print(np.max(S))
+
+    ret, threshold_img = cv2.threshold(S, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  
+    # ret, threshold_img = cv2.threshold(S, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  
+    
+    # show_images([threshold_img], ["S threshold"])
+
+    return threshold_img
+
 
 def preprocessing(img, name="", debug=False, gamma=False, close=False):
     '''
