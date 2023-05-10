@@ -54,7 +54,7 @@ def read_images(path_data_folder, type="train"):
     # print(np.shape(images_men['0']))
 
     # Add Women Images
-    images_women = images_Dictionary(path_data_folder+"women/"+type)
+    # images_women = images_Dictionary(path_data_folder+"women/"+type)
     # print(images_women)
     # print(np.shape(images_women['0']))
     images = {'0': None, '1': None, '2': None,
@@ -62,8 +62,9 @@ def read_images(path_data_folder, type="train"):
 
     for i in range(0, 6):
         print(i)
-        images[str(i)] = np.concatenate(
-            (images_men[str(i)], images_women[str(i)]), axis=0)
+        images[str(i)]=images_men[str(i)]
+        # images[str(i)] = np.concatenate(
+        #     (images_men[str(i)], images_women[str(i)]), axis=0)
 
     return images
 

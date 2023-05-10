@@ -38,8 +38,8 @@ def pick_random(source,destination,ratio=8):
     return None
 
 def split_data_simple():
-    input_folder='./data_simple/men'
-    output_folder="./data_simple/split/men"
+    input_folder='./data/men'
+    output_folder="./data_split/split/men"
 
     isExist = os.path.exists(output_folder)
     if  isExist:
@@ -48,8 +48,8 @@ def split_data_simple():
     splitfolders.ratio(input_folder,output=output_folder,seed=42,ratio=(.7,.2,.1),group_prefix=None)
 
 
-    input_folder='./data_simple/women'
-    output_folder="./data_simple/split/women"
+    input_folder='./data/women'
+    output_folder="./data_split/split/women"
 
     isExist = os.path.exists(output_folder)
     if  isExist:

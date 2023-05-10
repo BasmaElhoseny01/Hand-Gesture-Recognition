@@ -131,3 +131,10 @@ def draw_keypoints(img, keypoints, color=(255),radius=8,thickness=-1):
         cv2.circle(img, (int(x), int(y)), color=color, radius=radius, thickness=thickness) # you can change the radius and the thickness
 
     return img
+
+def showHist(img):
+    # An "interface" to matplotlib.axes.Axes.hist() method
+    plt.figure()
+    imgHist = histogram(img, nbins=256)
+    
+    bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
