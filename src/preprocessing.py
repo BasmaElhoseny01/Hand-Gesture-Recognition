@@ -142,3 +142,72 @@ def detect_exposure(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     hist, bins = np.histogram(img_gray, bins=256, range=(0, 255))
     print(hist)
+# -----------------------------------------------------------------------------------------------------------------------------------------------------
+def preprocessing2(img, name="", debug=False):
+    '''
+    Uses new skin_mask_range()
+    @parm img:BGR Scale img
+    '''
+
+    # Get Skin
+    skinMask=extract_skin(img,name=name,debug=debug)
+
+
+    # Apply Closing =(Erode+Dilate) to remove 
+    kernel = np.ones((3, 3), np.uint8)
+    skinMask = cv2.morphologyEx(skinMask, cv2.MORPH_ERODE, kernel, iterations=2) #erode
+    skinMask = cv2.morphologyEx(skinMask, cv2.MORPH_DILATE, kernel, iterations=2) #Dilate Back  
+
+    # Find Contours
+    contours, hierarchy = cv2.findContours(
+        skinMask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+    # Draw for debug
+    if (debug):
+        img_contours = np.copy(img)
+        cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 3)
+
+    # Get Largest Contour
+    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    largest_contour = sorted_contours[0]
+    if (debug):
+        largest_contour_img = np.copy(img)
+        cv2.drawContours(largest_contour_img,
+                         largest_contour, -1, (255, 0, 0), 10)
+
+    # Binary_img_contours[Result]
+    hand_contour = np.zeros((np.shape(img)[0], np.shape(img)[1], 1))
+    cv2.drawContours(hand_contour, largest_contour, -1, 255, 10)
+
+    if (debug):
+        show_images([cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
+                    skinMask, img_contours, largest_contour_img, hand_contour],
+                    ['RGB'+name, 'Mask(3)YCrCb', 'Contours', 'Largest Contour', 'hand_contour'])
+
+    return hand_contour
+
+def extract_skin(image,name="",debug=False):  #REPEATED
+    
+    # Converting from BGR Colors Space to HSV
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Defining HSV Threadholds
+    lower_threshold = np.array([0, 48, 80], dtype=np.uint8)
+    upper_threshold = np.array([20, 255, 255], dtype=np.uint8)
+
+    # Single Channel mask,denoting presence of colours in the about threshold
+    skinMask_b = cv2.inRange(img, lower_threshold, upper_threshold)
+
+    # Cleaning up mask using Gaussian Filter
+    skinMask = cv2.GaussianBlur(skinMask_b, (3, 3), 0)
+
+    if(debug):
+        # Extracting skin from the threshold mask
+        skin = cv2.bitwise_and(img, img, mask=skinMask)
+
+        # Return the Skin image
+        skin=cv2.cvtColor(skin, cv2.COLOR_HSV2RGB)
+        show_images([ cv2.cvtColor(image, cv2.COLOR_BGR2RGB),skinMask_b,skinMask,skin],['2_men (11).JPG','skinMask_b','skinMask','skin'])
+
+
+    return  skinMask
