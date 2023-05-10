@@ -18,20 +18,23 @@ def extract_features(path_data_folder, clusters, debug=False, images=None, train
 
     # Step(2) Descriptors
     # SIFT
-    descriptor_list, sift_vectors = sift_descriptors(images, debug=debug)
-
+    descriptor_list, sift_vectors = sift_descriptors(images, debug=False)
+    if debug:
+        print('Description Done')
     # #Step(3) Visual Dictionary
     # #CHECK: To create visual dictionary, we only use train dataset.
     if (train):
         visual_words = kmeans_visual_words(
             clusters, descriptor_list)  # Centroids of the K clusters
         # Till here we  have Defined to have a feature vector of size = clusters
-
+    if debug:
+        print('Kmeans DONE')
     # # #Step(4) Feature Vector
     feature_vectors, classification = image_feature_vectors(
         sift_vectors, visual_words)
     # # Here We have Achieved Feature Vector size k :D for all images
-
+    if debug:
+        print('Feature vector DONE')
     # Conver Feature_vecrots from dictionary 
 
     return feature_vectors, classification, visual_words
@@ -154,7 +157,7 @@ def image_feature_vectors(bag_of_words, centroids):
     dict_feature = {}
     classification = np.array([])
     for key, value in bag_of_words.items():
-        print(key, np.shape(value))
+        # print(key, np.shape(value))
         # Each Category
         category = []
         for img in value:
