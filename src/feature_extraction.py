@@ -87,8 +87,10 @@ def images_Dictionary(path_data_folder):
     """
     images = {
     }  # {'0':[[img1][img2]],'1':[[img1],[img2]...],'5':[[img1][img2]]}
+    print(os.listdir(path_data_folder))
     for filename in os.listdir(path_data_folder):
         # Each Subfolder
+        # if(filename==)
 
         path = path_data_folder + "/" + filename
         category_imgs = []
@@ -183,10 +185,11 @@ def orb_descriptors(images, params=None, debug=False):
 
             # Normalize descriptors
             if descriptors is None:
-                print("No Key Points Detected")
+                print("No Key Points Detected Dropped")
 
-            descriptor_list.extend(descriptors)
-            class_descriptors.append(descriptors)
+            else:
+                descriptor_list.extend(descriptors)
+                class_descriptors.append(descriptors)
 
         # print("shape", np.shape(class_descriptors))
         # print("shape", np.shape(class_descriptors[0]))
