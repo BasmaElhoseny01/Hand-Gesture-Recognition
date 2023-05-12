@@ -8,6 +8,8 @@ from skimage.exposure import histogram
 from matplotlib.pyplot import bar
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
+from itertools import compress
+
 
 import shutil
 import os

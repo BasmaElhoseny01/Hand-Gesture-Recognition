@@ -54,7 +54,7 @@ def read_images(path_data_folder, type="train"):
     # print(np.shape(images_men['0']))
 
     # Add Women Images
-    # images_women = images_Dictionary(path_data_folder+"women/"+type)
+    images_women = images_Dictionary(path_data_folder+"women/"+type)
     # print(images_women)
     # print(np.shape(images_women['0']))
     images = {'0': None, '1': None, '2': None,
@@ -62,9 +62,8 @@ def read_images(path_data_folder, type="train"):
 
     for i in range(0, 6):
         print(i)
-        images[str(i)]=images_men[str(i)]
-        # images[str(i)] = np.concatenate(
-        #     (images_men[str(i)], images_women[str(i)]), axis=0)
+        images[str(i)] = np.concatenate(
+            (images_men[str(i)], images_women[str(i)]), axis=0)
 
     return images
 
@@ -98,6 +97,8 @@ def images_Dictionary(path_data_folder):
             img = cv2.imread(path + "/" + cat, cv2.IMREAD_GRAYSCALE)
             # print(path + "/" + cat)
             if img is not None:
+                # img=cv2.resize(img,(1296,2304))
+                img = cv2.resize(img, (np.shape(img)[1]//4,np.shape(img)[0]//4))
                 category_imgs.append(img)
         if (images.get(filename) is None):
             images.update({filename: category_imgs})
@@ -354,3 +355,14 @@ def image_feature_vectors(bag_of_words, centroids):
 #     # plt.imshow(img), plt.show()
 
 #     return corners_detected
+
+
+def OCR(features_vector,img,name):
+    '''img:Binary Assume images are same size :D'''
+    sum_cols = np.sum(img,axis=0)
+    if(np.shape(sum_cols)[0]!=np.shape(features_vector)[1]):
+        print("Mismatch in Size",name," has ",np.shape(sum_cols)[0] ,'while before has ',np.shape(features_vector)[1])
+        return features_vector
+    
+    features_vector_train=np.vstack([features_vector_train,sum_cols])
+    return features_vector
