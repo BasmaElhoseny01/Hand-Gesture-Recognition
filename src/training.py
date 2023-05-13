@@ -37,6 +37,21 @@ def train_svm(X_train,y_train,X_test,y_test):
 
     return y_pred, y_test
 
+def train(X_train, Y_train, X_test, Y_test, model=None):
+    if model is None:
+        y_pred_svm, y_test_svm = train_svm(X_train, Y_train, X_test, Y_test)
+        y_pred_rf, y_test_rf = train_svm(X_train, Y_train, X_test, Y_test)
+        return y_pred_svm, y_test_svm, y_pred_rf, y_test_rf 
+    else:
+        if model == 'rf':
+            y_pred, y_test = train_randomforest(X_train, X_train, X_test, Y_test)
+            return y_pred, y_test
+        elif model == 'svm':
+            train_svm(X_train, Y_train, X_test, Y_test)
+            return y_pred, y_test
+
+
+
 # Random Forest
 # Naive Bayes
 # SVM
