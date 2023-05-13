@@ -18,13 +18,17 @@ def main(argv):
 
     # Step(2) Preprocess the images
     print("Preprocessing ...")
-    test_images=preprocessing(test_images,option=preprocessing_option)
+    OCR,classification,test_images=preprocessing(test_images,option=preprocessing_option)
     print('Preprocessing Done')
 
     # Step(3) Extract features
     # Note: We need to edit this part in order not to read images based on classes (i.e. one bulk of images)
     print("Extracting Features ...")
-    X_test,Y_test=extract_features(test_images,feature_extractor_option)
+    if(feature_extractor_option=="OCR"):  #IF OCR ALready OCR is Done
+        X_test=OCR
+        Y_test=classification
+    else:
+        X_test,Y_test=extract_features(test_images,feature_extractor_option)
     print('Features Extracted')
     test_images = None
 

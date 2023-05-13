@@ -2,6 +2,10 @@ from utils import *
 
 
 def preprocessing(images,option, debug=False):
+    #SIZE_OF_IMAGE:
+    OCR=np.empty((0,256),int)
+    classification=[]
+
     if(option=="0"):
         return images
     for i in range(6):
@@ -9,17 +13,25 @@ def preprocessing(images,option, debug=False):
         for img in images[str(i)]:
             if(option=="1"):
                 images[str(i)][index] = equalizeS(img, debug)
-            # elif(option=="2"):
+            elif(option=="2"):
+                #OCR
+                ocr,_=preprocessing_OCR(img)
+                OCR=np.vstack([OCR,ocr])
+                classification.append(i)
             else:
                 print("Wrong Preprocessing Option!!!",option)
                 raise TypeError("Wrong Preprocessing Option")
             index+=1
-            
-    return images
+    if(option=="1"):
+        OCR=None
+        classification=None
+    elif(option=="2"):
+        images=None
+    return OCR,classification,images
 
 
 
-
+#######################################################################################################
 def equalizeS(img, debug=False):
     '''
     - Equalize S
@@ -57,6 +69,7 @@ def equalizeS(img, debug=False):
     return img_eq
 
 
+#######################################################################################################
 # Doesn't need feature extraction
 def preprocessing_OCR(img):
     '''
@@ -65,33 +78,28 @@ def preprocessing_OCR(img):
     3.Translate
     img:BGR
     '''
-
-
     #Get Mask
     hand_mask=RGB_Mask(img)
 
     #Flip
     # OCR,hand_mask=flip_orientation(hand_mask)
     OCR,max_x_ind,min_x_ind,flipped_img=flip_horizontal(hand_mask)
-    hand_mask=flipped_img
     
-
     #Translate
     hand_center_x=max_x_ind
-    tx=np.shape(img_flip)[1]-hand_center_x
+    tx=np.shape(flipped_img)[1]-hand_center_x
     translation_matrix=np.array([
         [1,0,tx],
         [0,1,1]
     ],dtype=np.float32)
 
-    img_flip=img_flip.astype(np.float32)
-    img_flip=cv2.warpAffine(src=img_flip,M=translation_matrix,dsize=(np.shape(img_flip)[1],np.shape(img_flip)[0]))
+    flipped_img=flipped_img.astype(np.float32)
+    flipped_img=cv2.warpAffine(src=flipped_img,M=translation_matrix,dsize=(np.shape(flipped_img)[1],np.shape(flipped_img)[0]))
 
-    return OCR,img_flip
+    return OCR,flipped_img
 
 
-
-#####################
+##########################################################################
 # UTILITIES
 def RGB_Mask(img):
     '''

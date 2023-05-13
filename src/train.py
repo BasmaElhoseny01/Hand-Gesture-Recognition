@@ -21,14 +21,18 @@ def main(argv):
 
     # Step(2) Preprocess the images
     print("Preprocessing ...")
-    train_images = preprocessing(train_images,option=preprocessing_option)
+    OCR,classification,train_images = preprocessing(train_images,option=preprocessing_option)
     print('Preprocessing Done')
 
 
 
     # Step(3) Extract features
     print("Extracting Features ...")
-    X_train,Y_train=extract_features(train_images,feature_extractor_option)
+    if(feature_extractor_option=="OCR"):  #IF OCR ALready OCR is Done
+        X_train=OCR
+        Y_train=classification
+    else:
+        X_train,Y_train=extract_features(train_images,feature_extractor_option)
     print('Features Extracted')
     train_images = None
 
