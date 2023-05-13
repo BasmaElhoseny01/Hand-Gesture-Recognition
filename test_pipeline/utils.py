@@ -14,46 +14,16 @@ import joblib
 import shutil
 import os
 
-def show_images(images, titles=None,save=False,path_save=""):
-    """
-    This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
-    @param images :array of images to be shown
-    @param titles:titles corresponding to images
-
-    @return None
-    """
-    #
-    # images[0] will be drawn with the title titles[0] if exists
-    # You aren't required to understand this function, use it as-is.
-    n_ims = len(images)
-    if titles is None:
-        titles = ['(%d)' % i for i in range(1, n_ims + 1)]
-    fig = plt.figure()
-    n = 1
-    for image, title in zip(images, titles):
-        a = fig.add_subplot(1, n_ims, n)
-        if image.ndim == 2:
-            plt.gray()
-        plt.imshow(image)
-        a.set_title(title)
-        n += 1
-    fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
-    if(save):
-        plt.savefig(path_save)
-    else:
-        plt.show()
-    return None
-
-def read_images(path_data_folder, debug=False):
+def read_images(path_data_folder, type="train"):
     """
     Read images for men and women
     """
     # Read Images in A dictionary
-    images_men = images_Dictionary(path_data_folder+"men/train/", debug=debug)
+    images_men = images_Dictionary(path_data_folder+"men/"+type)
     # print(np.shape(images_men['0']))
 
     # Add Women Images
-    images_women = images_Dictionary(path_data_folder+"women/train/", debug=debug)
+    images_women = images_Dictionary(path_data_folder+"women/"+type)
     # print(images_women)
     # print(np.shape(images_women['0']))
     images = {'0': None, '1': None, '2': None,
@@ -67,7 +37,7 @@ def read_images(path_data_folder, debug=False):
 
     return images
 
-def images_Dictionary(path_data_folder, debug=False):
+def images_Dictionary(path_data_folder):
     """
     Folder Structure
     'class1'
@@ -93,11 +63,8 @@ def images_Dictionary(path_data_folder, debug=False):
         category_imgs = []
         for cat in os.listdir(path):
             # Every folder --> loop of all images in the folder of men
-            img = cv2.imread(path + "/" + cat) #YALAHWII
-            print(path + "/" + cat)
+            img = cv2.imread(path + "/" + cat)
             if img is not None:
-                if(debug):
-                    show_images([img])
                 category_imgs.append(img)
         if (images.get(filename) is None):
             images.update({filename: category_imgs})
@@ -105,3 +72,12 @@ def images_Dictionary(path_data_folder, debug=False):
             images[filename].append(category_imgs)
 
     return images
+
+def performance_analysis(result,expected):
+    # Accuracy is the percentage of data that are correctly classified, which ranges from 0 to 1
+    accuracy=accuracy_score(result, expected)
+    
+    # Precision is your go-to evaluation metric when dealing with imbalanced data.
+
+    # Recall
+    return accuracy

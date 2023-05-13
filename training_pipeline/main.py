@@ -4,8 +4,8 @@
 from utils import *
 
 # Step(1) Read Images
-path='../data/'
-train_images=read_images(path)
+training_path='../data_split_resize/'
+train_images=read_images(training_path)
 print("Files loaded")
 
 # Step(2) Preprocess the images
@@ -18,7 +18,7 @@ for i in range(6):
     print(i)
     for img in train_images[str(i)]:
             img = resize(img, (64*4, 128*4))
-            fd, hog_image = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True)
+            fd, hog_image = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True, channel_axis=2)
             X_train.append(fd)
             Y_train.append(i)
 print('Features Extracted')
