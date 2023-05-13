@@ -17,11 +17,12 @@ Y_test = []
 for i in range(6):
     print(i)
     for img in test_images[str(i)]:
-            img = resize(img, (64*4, 128*4))
             fd, hog_image = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True, channel_axis=2)
             X_test.append(fd)
             Y_test.append(i)
 print('Features Extracted')
+
+test_images = None
 
 # Step(4) Load our model
 filename = "Trained_SVM.joblib"
