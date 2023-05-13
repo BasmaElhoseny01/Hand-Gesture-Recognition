@@ -3,17 +3,27 @@ import math
 import cv2
 import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
-from skimage.exposure import histogram
 from matplotlib.pyplot import bar
+
+from skimage.exposure import histogram
+from skimage.feature import hog
+
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+
+from itertools import compress
 import shutil
 import os
+import joblib
 
 
-def show_images(images, titles=None,save=False,path_save=""):
+
+def show_images(images, titles=None, save=False, path_save=""):
     """
     This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
     @param images :array of images to be shown
@@ -37,7 +47,7 @@ def show_images(images, titles=None,save=False,path_save=""):
         a.set_title(title)
         n += 1
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
-    if(save):
+    if (save):
         plt.savefig(path_save)
     else:
         plt.show()
@@ -58,7 +68,6 @@ def read_image(path, color_space="RGB"):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
-
 # Show Histogram of Gray Scale image
 def showHist(img):
     """
@@ -75,7 +84,95 @@ def showHist(img):
     bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
 
 
-def kmeans_visual_words(k, descriptor_list,n_init=1):
+def read_images_test(path_data_folder, type="train"):
+    """
+    Read images for men and women
+    """
+    # Read Images in A dictionary
+    images_men = images_Dictionary(path_data_folder+"men/"+type)
+    # print(np.shape(images_men['0']))
+
+    # Add Women Images
+    images_women = images_Dictionary(path_data_folder+"women/"+type)
+    # print(images_women)
+    # print(np.shape(images_women['0']))
+    images = {'0': None, '1': None, '2': None,
+              '3': None, '4': None, '5': None}
+
+    for i in range(0, 6):
+        print(i)
+        images[str(i)] = np.concatenate(
+            (images_men[str(i)], images_women[str(i)]), axis=0)
+    # Solution_01:Concatinate part by part, and delete each concatinated part
+
+    return images
+
+def read_images(path_data_folder, debug=False):
+    """
+    Read images for men and women
+    """
+    # Read Images in A dictionary
+    images_men = images_Dictionary(path_data_folder+"men/train/", debug=debug)
+    # print(np.shape(images_men['0']))
+
+    # Add Women Images
+    images_women = images_Dictionary(
+        path_data_folder+"women/train/", debug=debug)
+    # print(images_women)
+    # print(np.shape(images_women['0']))
+    images = {'0': None, '1': None, '2': None,
+              '3': None, '4': None, '5': None}
+
+    for i in range(0, 6):
+        print(i)
+        images[str(i)] = np.concatenate(
+            (images_men[str(i)], images_women[str(i)]), axis=0)
+    # Solution_01:Concatenate part by part, and delete each concatenated part
+
+    return images
+
+
+def images_Dictionary(path_data_folder, debug=False):
+    """
+    Folder Structure
+    'class1'
+        1.jpg
+        .....
+        50.jpg
+
+    'class2'
+        1.jpg
+        .....
+        80.jpg
+
+
+    @param Data path
+    @param images = {} to store in it
+    """
+    images = {
+    }  # {'0':[[img1][img2]],'1':[[img1],[img2]...],'5':[[img1][img2]]}
+    for filename in os.listdir(path_data_folder):
+        # Each Subfolder
+
+        path = path_data_folder + "/" + filename
+        category_imgs = []
+        for cat in os.listdir(path):
+            # Every folder --> loop of all images in the folder of men
+            img = cv2.imread(path + "/" + cat)  # YALAHWII
+            print(path + "/" + cat)
+            if img is not None:
+                if (debug):
+                    show_images([img])
+                category_imgs.append(img)
+        if (images.get(filename) is None):
+            images.update({filename: category_imgs})
+        else:
+            images[filename].append(category_imgs)
+
+    return images
+
+
+def kmeans_visual_words(k, descriptor_list, n_init=1):
     """
     Get Visual Words
     @param k:number of clusters
@@ -84,10 +181,11 @@ def kmeans_visual_words(k, descriptor_list,n_init=1):
 
     @return visual_words: (*K) centroids of the k clusters   case SIFT (128*K) :)
     """
-    kmeans = KMeans(n_clusters = k, n_init=n_init)
+    kmeans = KMeans(n_clusters=k, n_init=n_init)
     kmeans.fit(descriptor_list)
-    visual_words = kmeans.cluster_centers_ 
+    visual_words = kmeans.cluster_centers_
     return visual_words
+
 
 def findClosestCentroids(X, centroids):
     """
@@ -102,8 +200,7 @@ def findClosestCentroids(X, centroids):
     """
     # Set K size.
     K = centroids.shape[0]
-    count_clusters=np.zeros((K,1))
-    
+    count_clusters = np.zeros((K, 1))
 
     # Initialise idx.
     idx = np.zeros((X.shape[0], 1), dtype=np.int8)
@@ -116,18 +213,19 @@ def findClosestCentroids(X, centroids):
         # replacing the need for a for-loop and if statement.
         min_dst = np.argmin(distances)
         idx[i] = min_dst
-        count_clusters[min_dst]+=1
+        count_clusters[min_dst] += 1
 
-    return idx,count_clusters
+    return idx, count_clusters
 
 
-def draw_keypoints(img, keypoints, color=(255),radius=8,thickness=-1):
+def draw_keypoints(img, keypoints, color=(255), radius=8, thickness=-1):
     # Convert Gray Scale to RGB ti be able to draw on it colors
-    img=cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
-    
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
     for kp in keypoints:
         x, y = kp.pt
-        cv2.circle(img, (int(x), int(y)), color=color, radius=radius, thickness=thickness) # you can change the radius and the thickness
+        # you can change the radius and the thickness
+        cv2.circle(img, (int(x), int(y)), color=color,
+                   radius=radius, thickness=thickness)
 
     return img

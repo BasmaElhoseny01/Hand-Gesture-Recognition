@@ -1,0 +1,65 @@
+# This is the main pipeline for testing our model
+
+# Step(0) Import the required utilities
+from utils import *
+from modules.preprocessing import preprocessing
+
+# Step(1) Read Images
+path='../data_split_resize/'
+test_images=read_images_test(path,type="test")
+print('Images loaded')
+
+# Step(2) Preprocess the images
+test_images=preprocessing(test_images)
+print('Preprocessing Done')
+
+# Step(3) Extract features
+# Note: We need to edit this part in order not to read images based on classes (i.e. one bulk of images)
+X_test = []
+Y_test = []
+for i in range(6):
+    print(i)
+    for img in test_images[str(i)]:
+            fd, hog_image = hog(img, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2), visualize=True, channel_axis=2)
+            X_test.append(fd)
+            Y_test.append(i)
+print('Features Extracted')
+
+test_images = None
+
+# Step(4) Load our model SVM
+filename = "../models/Trained_SVM.joblib"
+loaded_model = joblib.load(filename)
+print('SVM Model loaded')
+
+# Step(5) Evaluate the results
+result = loaded_model.predict(X_test)
+print('SVM Results evaluated')
+
+# Step(6) Write the results into txt file
+y = ["{}\n".format(i) for i in result]
+with open('../results/svm_results.txt', 'w') as fp:
+    fp.writelines(y)
+print('SVM Results saved')
+
+
+# Step(4) Load our model SVM
+filename = "../models/Trained_RF.joblib"
+loaded_model = joblib.load(filename)
+print('RF Model loaded')
+
+# Step(5) Evaluate the results
+result = loaded_model.predict(X_test)
+print('RF Results evaluated')
+
+# Step(6) Write the results into txt file
+y = ["{}\n".format(i) for i in result]
+with open('../results/rf_results.txt', 'w') as fp:
+    fp.writelines(y)
+print('RF Results saved')
+
+
+y = ["{}\n".format(i) for i in Y_test]
+with open('../results/expected.txt', 'w') as fp:
+    fp.writelines(y)
+print('Expected outputs saved')
