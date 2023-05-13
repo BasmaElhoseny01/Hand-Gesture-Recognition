@@ -137,6 +137,7 @@ def shadow_remove(img):
         result_norm_planes.append(norm_img)
     shadow_removed = cv2.merge(result_norm_planes)
     return shadow_removed
+import time
 
 def preprocessing_new_2(img,name="",debug=False):
     '''
@@ -152,7 +153,7 @@ def preprocessing_new_2(img,name="",debug=False):
 
     '''
     '''
-    img:rgb
+    img:bgr
     @return binary img
     '''
 
@@ -161,27 +162,133 @@ def preprocessing_new_2(img,name="",debug=False):
     # print(np.shape(img))
     # img = cv2.resize(img, (128*4,64*4))
     # show_images([img],['img'])    
+
+    # Change Color
+    st = time.time()
+    img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     #--------------------------------------------------------------------------------------------------------
     #Shadow removal
     shadow_removed = shadow_remove(img)
-    show_images([img])
-    return None ,None
+    end = time.time()
+    print('shadow_removed',end-st)
+
+   
 
     #----------------------------------------------------------------------------------------------------------------
     #Gamma Correction
+    st = time.time()
     # shadow_removed_gamma=gammaCorrection(shadow_removed,0.4)
     shadow_removed_gamma=shadow_removed
     shadow_removed_gamma=cv2.cvtColor(shadow_removed_gamma,cv2.COLOR_RGB2GRAY)#Convert it to Gray
+    end = time.time()
+    print('Gamma',end-st)
+
+    # shadow_removed_gamma=255-shadow_removed_gamma
+
+
+    # hsv_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    # lower_skin = (0, 20, 70)
+    # upper_skin = (20, 255, 255)
+    # skin_hsv=cv2.inRange(hsv_image, lower_skin, upper_skin)
+    # end = time.time()
+    # print('Gamma',end-st)
+
+
+    st = time.time()
+    ycrcb_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+    lower_skin = (0, 135, 85)
+    upper_skin = (255, 180, 135)
+    skin_ycrcb= cv2.inRange(ycrcb_image, lower_skin, upper_skin)
+    end = time.time()
+    print('ycrcb_image',end-st)
+
+
+
+    region_anding=cv2.bitwise_and(skin_ycrcb,shadow_removed_gamma) #0&255
+
+
+    #Erosion
+    kernel = np.ones((4, 4), np.uint8)
+    # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
+    edge_dilate = cv2.morphologyEx(region_anding, cv2.MORPH_ERODE, kernel, iterations=2) #erode
+
+
+    #Flip
+    st = time.time()
+    _,max_x_ind,min_x_ind,img_flip=flip_horizontal(edge_dilate,debug)
+    end = time.time()
+    print('Flip',end-st)
+
+
+    #Translate
+    st = time.time()
+    hand_center_x=max_x_ind
+    tx=np.shape(img_flip)[1]-hand_center_x
+    translation_matrix=np.array([
+        [1,0,tx],
+        [0,1,1]
+    ],dtype=np.float32)
+
+    img_flip=img_flip.astype(np.float32)
+    img_flip_tran=cv2.warpAffine(src=img_flip,M=translation_matrix,dsize=(np.shape(img_flip)[1],np.shape(img_flip)[0]))
+    end = time.time()
+    print('Translate',end-st)
+
+    #Cut Fingers  img_flip_tran is by reference
+    st = time.time()
+    raduis=(max_x_ind-min_x_ind)//2
+    image_finger=cut_fingers(img_flip_tran,np.shape(img_flip_tran)[1]-1,raduis)
+    image_finger=np.uint8(image_finger*255)
+    end = time.time()
+    print('Cut Fingers',end-st)
+
+
+
+
+    #Thresholding
+    # ret2,th2 = cv2.threshold(image_finger,150,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    ret2,th2 = cv2.threshold(image_finger,10,255,cv2.THRESH_BINARY)
+
+
+
+
+    # show_images([img,shadow_removed,shadow_removed_gamma,skin_ycrcb,region_anding,edge_dilate,img_flip,image_finger,th2],['Original','Shadow Remove','shadow_removed_gamma','skin_ycrcb','region_anding','edge_dilate','img_flip','image_finger','th2'])
+    
+    image_finger=th2
+    return img_flip,image_finger
+    # return img_flip*255,image_finger
 
 
     #-------------------------------------------------------------------------------------------------------------
     #Canny Edge
     # Setting parameter values
     t_lower = 50  # Lower Threshold
-    t_upper = 120  # Upper threshold
+    t_upper = 150  # Upper threshold
     
     # Applying the Canny Edge filter
     edge = cv2.Canny(shadow_removed_gamma, t_lower, t_upper)
+
+
+    # Close
+    kernel = np.ones((5, 5), np.uint8)
+    # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
+    edge_dilate = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel, iterations=3) #erode
+
+
+    # Region Filling
+    img_fill=edge_dilate.copy()
+    h,w=edge_dilate.shape[:2]
+    mask=np.zeros((h+2,w+2),np.uint8)
+    cv2.floodFill(img_fill,mask,(0,0),255)#img_fill marks regions filled -> not so that we can see it bec they are black
+    #mask 0,1 while bit wise not get 255,254
+    region_filling=cv2.bitwise_not(mask*255)//255
+
+
+
+
+    show_images([img,shadow_removed,shadow_removed_gamma,edge,edge_dilate,region_filling],['Original','Shadow Remove','shadow_removed_gamma','edge','edge_dilate','region_filling'])
+    return None ,None
+
     # Erosion
     kernel = np.ones((5, 5), np.uint8)
     # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
@@ -190,6 +297,8 @@ def preprocessing_new_2(img,name="",debug=False):
     #--------------------------------------------------------------------------------------------------------------------
     # Add Padding
     edge=np.pad(edge,pad_width=50,mode='constant',constant_values=0)
+
+    
 
 
     # Draw Line to the right --------------------------------------------------------------------------------------
@@ -478,6 +587,6 @@ def flip_orientation(img):
     return OCR,img
 
 
-def cut_fingers(hand_binary,hand_center_x):
-  image_finger = cv2.circle(hand_binary, (hand_center_x,np.shape(hand_binary)[0]//2), 150,0, -1)
+def cut_fingers(hand_binary,hand_center_x,raduis=150):
+  image_finger = cv2.circle(hand_binary, (hand_center_x,np.shape(hand_binary)[0]//2), raduis,0, -1)
   return image_finger
