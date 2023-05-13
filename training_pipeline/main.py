@@ -17,7 +17,7 @@ Y_train = []
 for i in range(6):
     print(i)
     for img in train_images[str(i)]:
-            fd, hog_image = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True, channel_axis=2)
+            fd, hog_image = hog(img, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2), visualize=True, channel_axis=2)
             X_train.append(fd)
             Y_train.append(i)
 print('Features Extracted')
