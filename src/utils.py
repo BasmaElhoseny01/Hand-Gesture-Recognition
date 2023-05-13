@@ -20,6 +20,7 @@ from itertools import compress
 import shutil
 import os
 import joblib
+import sys
 
 
 
@@ -159,7 +160,7 @@ def images_Dictionary(path_data_folder, debug=False):
         for cat in os.listdir(path):
             # Every folder --> loop of all images in the folder of men
             img = cv2.imread(path + "/" + cat)  # YALAHWII
-            print(path + "/" + cat)
+            # print(path + "/" + cat)
             if img is not None:
                 if (debug):
                     show_images([img])

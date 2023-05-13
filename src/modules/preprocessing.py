@@ -1,12 +1,20 @@
 from utils import *
 
 
-def preprocessing(images, debug=False):
+def preprocessing(images,option, debug=False):
+    if(option=="0"):
+        return images
     for i in range(6):
-        print(i)
+        index=0
         for img in images[str(i)]:
-            img = equalizeS(img, debug)
-    
+            if(option=="1"):
+                images[str(i)][index] = equalizeS(img, debug)
+            # elif(option=="2"):
+            else:
+                print("Wrong Preprocessing Option!!!",option)
+                raise TypeError("Wrong Preprocessing Option")
+            index+=1
+            
     return images
 
 
@@ -48,7 +56,7 @@ def equalizeS(img, debug=False):
     
     return img_eq
 
-#################################################
+
 # Doesn't need feature extraction
 def preprocessing_OCR(img):
     '''
