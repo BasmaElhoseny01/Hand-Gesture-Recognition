@@ -13,7 +13,7 @@ def preprocessing_new_1(img,debug=False):
     2.Equalize S
     3.Remove BackGround
     4.Flip orientation
-    5.Find Contours
+    5.Find Contours xx
 
     Commented
     -Equalize Y in YUV 
@@ -111,6 +111,8 @@ def preprocessing_new_1(img,debug=False):
 
     return hand_contour
 
+#-------------------------------------------------------------------------------------------------------------------------------
+
 def gammaCorrection(src,gamma):
     invGamma=1/gamma
     table=[((i/255)**invGamma)*255 for i in range(256)]
@@ -155,12 +157,15 @@ def preprocessing_new_2(img,name="",debug=False):
     '''
 
     # Resize -------------------------------------------------------------------------------------------------------
-    img = cv2.resize(img, (np.shape(img)[1]//4,np.shape(img)[0]//4))  
+    # img = cv2.resize(img, (np.shape(img)[1]//4,np.shape(img)[0]//4))  
+    # print(np.shape(img))
     # img = cv2.resize(img, (128*4,64*4))
     # show_images([img],['img'])    
     #--------------------------------------------------------------------------------------------------------
     #Shadow removal
     shadow_removed = shadow_remove(img)
+    show_images([img])
+    return None ,None
 
     #----------------------------------------------------------------------------------------------------------------
     #Gamma Correction
@@ -235,47 +240,162 @@ def preprocessing_new_2(img,name="",debug=False):
 
     #-----------------------------------------------------------------------------------------------------------
     #Flip 
-    _,_,_,img_flip=flip_horizontal(region_filling,debug)
+    _,max_x_ind,_,img_flip=flip_horizontal(region_filling,debug)
+
+
+    #Shift to right
+    hand_center_x=max_x_ind
+    hand_mask=img_flip
+
+    # hand_mask=hand_mask[:,0:hand_center_x+1]
+    #Translate
+    tx=np.shape(hand_mask)[1]-hand_center_x
+    translation_matrix=np.array([
+        [1,0,tx],
+        [0,1,1]
+    ],dtype=np.float32)
+
+    hand_mask=hand_mask.astype(np.float32)
+    hand_mask=cv2.warpAffine(src=hand_mask,M=translation_matrix,dsize=(np.shape(hand_mask)[1],np.shape(hand_mask)[0]))
+
+    #Cut Fingers
+    image_finger=cut_fingers(hand_mask,np.shape(hand_mask)[1]-1)
+
+
+    #Remove Padding
+    image_finger=image_finger[50:np.shape(image_finger)[0]-50-4,50:np.shape(image_finger)[1]-50-4]
+
+    return hand_mask,image_finger*255
+
 
 
     if(debug):
         utils.show_images([cv2.cvtColor(img,cv2.COLOR_BGR2RGB),shadow_removed,shadow_removed_gamma,edge,region_filling],['Original','shadow_removed','shadow_removed_gamma,edge','region_filling'])
         utils.show_images([img_flip],['img_flip'])
     
+    #Translate
 
-    #-----------------------------------------------------------------------------------------------------------------
-    # Find Contours
-    contours, hierarchy = cv2.findContours(
-            img_flip, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    if(len(contours)==0):
-        print("No Contours found",name)
-        return None
+    # #-----------------------------------------------------------------------------------------------------------------
+    # # Find Contours
+    # contours, hierarchy = cv2.findContours(
+    #         img_flip, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # if(len(contours)==0):
+    #     print("No Contours found",name)
+    #     return None
 
-    # Draw for debug
-    if (debug):
-        img_contours = np.copy(img)
-        cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 3)
+    # # Draw for debug
+    # if (debug):
+    #     img_contours = np.copy(img)
+    #     cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 3)
 
-    # Get Largest Contour
-    sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    largest_contour = sorted_contours[0]
+    # # Get Largest Contour
+    # sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    # largest_contour = sorted_contours[0]
 
-    # Binary_img_contours[Result]
-    hand_contour = np.zeros((np.shape(img_flip)[0], np.shape(img_flip)[1], 1))
-    cv2.drawContours(hand_contour, largest_contour, -1, 255, 10)
+    # # Binary_img_contours[Result]
+    # hand_contour = np.zeros((np.shape(img_flip)[0], np.shape(img_flip)[1], 1))
+    # cv2.drawContours(hand_contour, largest_contour, -1, 255, 10)
 
 
-    if(debug):
-        print("Contours",np.shape(contours))
-        utils.show_images([img_contours,hand_contour])
+    # if(debug):
+    #     print("Contours",np.shape(contours))
+    #     utils.show_images([img_contours,hand_contour])
 
 
     return img_flip*255,hand_contour
     
-        
+#----------------------------------------------------------------------------------------------------------------------------------
+
+def preprocessing_OCR(img):
+    '''
+    img:BGR
+    '''
+    #Resize
+    img = cv2.resize(img, (128*4,64*4))#width,height
+
+
+    #Get Mask
+    hand_mask=RGB_Mask(img)
+
+    #Flip
+    # OCR,hand_mask=flip_orientation(hand_mask)
+    OCR,max_x_ind,min_x_ind,flipped_img=flip_horizontal(hand_mask)
+    hand_mask=flipped_img
+
+    #Shift
+    hand_center_x=max_x_ind
+    hand_mask=hand_mask[:,0:hand_center_x+1]
+    return OCR,hand_mask
+
+
+def RGB_Mask(img):
+    '''
+    Get RGB Mask of the Skin
+    Ref:https://medium.com/swlh/face-detection-using-skin-tone-threshold-rgb-ycrcb-python-implementation-2d4f62d376f1
+
+
+    img:BGR
+    '''
+    img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    R=img[:,:,0]
+    G=img[:,:,1]
+    B=img[:,:,2]
+
+    BGR_Max=np.maximum.reduce([R,G,B])
+    BGR_Min=np.minimum.reduce([R,G,B])
+
+    Rule_1=np.logical_and.reduce([R>95,G>40,B>20,(BGR_Max-BGR_Min)>15,abs(R-G)>15,R>G,R>B])
+    Rule_2=np.logical_and.reduce([R>220,G>210,B>170,abs(R-G)<=15,R>B,G>B])
+
+    RGB_Rule=np.bitwise_or(Rule_1,Rule_2)
+    RGB_Rule=RGB_Rule*255
+
+   
+
+    return RGB_Rule
+
+#--------------------------------------------------------------------------------------------------------------------------------
+def preprocessing_new_3(img):
+    '''
+    img:BGR
+    '''
+    #Resize
+    img = cv2.resize(img, (128*4,64*4))#width,height
+
+
+    #Get Mask
+    hand_mask=RGB_Mask(img)
+
+    #Flip
+    # OCR,hand_mask=flip_orientation(hand_mask)
+    OCR,max_x_ind,min_x_ind,flipped_img=flip_horizontal(hand_mask)
+    hand_mask=flipped_img
+
+    # #Shift
+    hand_center_x=max_x_ind
+    # hand_mask=hand_mask[:,0:hand_center_x+1]
+    #Translate
+    tx=np.shape(hand_mask)[1]-hand_center_x
+    translation_matrix=np.array([
+        [1,0,tx],
+        [0,1,1]
+    ],dtype=np.float32)
+
+    hand_mask=hand_mask.astype(np.float32)
+    hand_mask=cv2.warpAffine(src=hand_mask,M=translation_matrix,dsize=(np.shape(hand_mask)[1],np.shape(hand_mask)[0]))
+
+    #Cut Fingers
+    image_finger=cut_fingers(hand_mask,np.shape(hand_mask)[1]-1)
+
+    return OCR,hand_mask,image_finger
+
+#-----------------------------------------------------------------------------------------------------------------------------
 def flip_horizontal(img,debug=False):
     '''
     img:Binary image
+    Adjust Orientation of the hand Horizontally
+    Still need to modify it vertically ***
     '''
 
     #Compute OCR
@@ -296,6 +416,7 @@ def flip_horizontal(img,debug=False):
         img=cv2.flip(img,1) #1=horizontally
         max_x_ind=np.shape(img)[1]-max_x_ind
         min_x_ind=np.shape(img)[1]-min_x_ind 
+        OCR=np.flip(OCR)
       
 
 
@@ -336,3 +457,27 @@ def flip_horizontal(img,debug=False):
 
 
     return OCR,max_x_ind,min_x_ind,img
+
+
+def flip_orientation(img):
+    '''
+    Adjust Orientation of the hand Horizontally
+    Still need to modify it vertically ***
+    img:Binary image
+    '''
+
+    # Flip To make Same Orientation of the hand [Horizontally]
+    sum_cols = np.sum(img,axis=0)
+
+    OCR=sum_cols
+    res=list(compress(range(len(sum_cols==np.max(OCR))),sum_cols==np.max(OCR)))
+
+    if(res[0]<(np.shape(img)[1]/2)):
+        img=cv2.flip(img,1) #1=horizontally
+
+    return OCR,img
+
+
+def cut_fingers(hand_binary,hand_center_x):
+  image_finger = cv2.circle(hand_binary, (hand_center_x,np.shape(hand_binary)[0]//2), 150,0, -1)
+  return image_finger

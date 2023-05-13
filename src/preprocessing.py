@@ -265,6 +265,9 @@ def preprocessing_OCR(img):
     '''
     img:BGR
     '''
+    #Resize
+    img = cv2.resize(img, (128*4,64*4))#width,height
+
 
     #Get Mask
     hand_mask=RGB_Mask(img)

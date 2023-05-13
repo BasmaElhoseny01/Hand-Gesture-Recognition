@@ -20,7 +20,7 @@ def train_randomforest(X_train,y_train,X_test,y_test):
     # Predict the labels of the test data
     y_pred = rf.predict(X_test)
 
-    return y_pred, y_test
+    return y_pred, y_test,rf
 
 def train_svm(X_train,y_train,X_test,y_test):
     # Split the dataset into training and testing sets
@@ -35,7 +35,7 @@ def train_svm(X_train,y_train,X_test,y_test):
     # Predict the labels of the test data
     y_pred = clf.predict(X_test)
 
-    return y_pred, y_test
+    return y_pred, y_test,clf
 
 # Random Forest
 # Naive Bayes
