@@ -6,3 +6,4 @@ Test Algorithms images/
 test_data/
 training_pipeline/resized_imgs
 data_split_resize/
+old_preprocessing/
