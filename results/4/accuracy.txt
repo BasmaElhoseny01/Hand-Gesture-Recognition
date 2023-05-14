@@ -1,0 +1,5 @@
+preprocessing_option: 3
+feature_extractor_option: orb
+model_option: both
+RF: 0.4512820512820513
+SVM: 0.4205128205128205

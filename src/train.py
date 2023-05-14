@@ -23,6 +23,7 @@ def main(argv):
     print("Preprocessing ...")
     OCR,classification,train_images = preprocessing(train_images,option=preprocessing_option)
     print('Preprocessing Done')
+    print(np.shape(train_images['0']))
 
 
 
@@ -31,6 +32,13 @@ def main(argv):
     if(feature_extractor_option=="OCR"):  #IF OCR ALready OCR is Done
         X_train=OCR
         Y_train=classification
+    elif(feature_extractor_option=="orb"):
+        X_train,Y_train,visual_words=extract_features(train_images,feature_extractor_option,train=True,visual_words=None,clusters=10)
+
+        #Save visual_words in .py file
+        print("Saving Visual Words...")
+        np.save('../models/visual_words.npy',visual_words)
+
     else:
         X_train,Y_train=extract_features(train_images,feature_extractor_option)
     print('Features Extracted')

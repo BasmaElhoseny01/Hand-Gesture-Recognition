@@ -15,6 +15,9 @@ cd ..
 
 :: Run Train - Test -Evaluate
 cd ./src
+::Initilaize IMG_SIZE
+python ./__init__.py
+IF %ERRORLEVEL% NEQ 0 (Echo An error was found &Exit /b 1)
 python ./train.py %1 %2 %3
 IF %ERRORLEVEL% NEQ 0 (Echo An error was found &Exit /b 1)
 python ./test.py %1 %2 %3

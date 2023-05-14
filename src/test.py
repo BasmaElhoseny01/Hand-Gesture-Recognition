@@ -27,6 +27,13 @@ def main(argv):
     if(feature_extractor_option=="OCR"):  #IF OCR ALready OCR is Done
         X_test=OCR
         Y_test=classification
+
+    elif(feature_extractor_option=="orb"):        
+        #Read visual_words from .npy file
+        print("Loading Visual Words...")
+        visual_words=np.load('../models/visual_words.npy')
+        X_test,Y_test,_=extract_features(test_images,feature_extractor_option,train=False,visual_words=visual_words)
+
     else:
         X_test,Y_test=extract_features(test_images,feature_extractor_option)
     print('Features Extracted')
