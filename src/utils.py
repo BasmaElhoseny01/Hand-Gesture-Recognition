@@ -10,10 +10,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 from itertools import compress
 
-
 import shutil
 import os
-
 
 def show_images(images, titles=None,save=False,path_save=""):
     """
