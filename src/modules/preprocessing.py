@@ -73,6 +73,62 @@ def preprocessing(images,option, debug=False):
 
 
 #######################################################################################################
+def preprocessing_basma(img,debug=False):
+    ''''
+    -Remove Shadow
+    @param img:bgr img
+
+    '''
+    # --------------------------------------------------------------------------------------------------------
+    # Shadow removal
+    shadow_removed = shadow_remove(img)
+
+
+    # --------------------------------------------------------------------------------------------------------
+    # Threshold
+    # Convert to grey scale
+    img_grey=cv2.cvtColor(shadow_removed,cv2.COLOR_RGB2GRAY)
+
+    kernel=(5,5)
+    blur = cv2.blur(img_grey,kernel)
+
+    shadow_removed_gamma=gammaCorrection(blur,0.4)
+    print(np.max(shadow_removed_gamma))
+
+
+
+    # Find Contours
+    contours, hierarchy = cv2.findContours(
+            shadow_removed_gamma, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    print(len(contours))
+
+    cv2.drawContours(img, contours, -1, (255,0,0), 50)
+
+
+
+
+    # # Get Largest Contour
+    # sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    # largest_contour = sorted_contours[0]
+
+    # # Binary_img_contours[Result]
+    # hand_contour = np.zeros((np.shape(shadow_removed_gamma)[0], np.shape(shadow_removed_gamma)[1], 1))
+    # cv2.drawContours(hand_contour, largest_contour, -1, 255, 50)
+
+    # th = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,2)
+    # th=255-th
+
+    # #Erosion
+    # kernel = np.ones((3, 2), np.uint8)
+    # erode = cv2.morphologyEx(th, cv2.MORPH_ERODE, kernel, iterations=1) #erode
+    # erode=255-erode
+
+
+    if(debug):
+        show_images([cv2.cvtColor(img,cv2.COLOR_BGR2RGB),shadow_removed,img_grey,blur,shadow_removed_gamma],['Original','shadow_removed','img_grey','blur','shadow_removed_gamma'])
+
+    result = shadow_removed
+    return result
 def equalizeS(img, debug=False):
     '''
     - Equalize S
@@ -361,3 +417,9 @@ def shadow_remove(img):
 def cut_fingers(hand_binary,hand_center_x,raduis=150):
   image_finger = cv2.circle(hand_binary, (hand_center_x,np.shape(hand_binary)[0]//2), raduis,0, -1)
   return image_finger
+
+def gammaCorrection(src,gamma):
+    invGamma=1/gamma
+    table=[((i/255)**invGamma)*255 for i in range(256)]
+    table=np.array(table,np.uint8)
+    return cv2.LUT(src,table)
