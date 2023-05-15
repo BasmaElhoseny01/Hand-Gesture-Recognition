@@ -40,25 +40,28 @@ def pick_random(source, destination, ratio=8):
 
 
 def split_data_simple():
-    input_folder = './data_simple/men'
-    output_folder = "./data_simple/split/men"
+    current_dir=os.path.dirname(os.path.realpath(__file__))
+    input_folder = os.path.join(current_dir,'../../data_resize/men/')
+    output_folder = os.path.join(current_dir,'../../data_split_resize/men/')
 
     isExist = os.path.exists(output_folder)
     if isExist:
         shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
         os.makedirs(output_folder)
     splitfolders.ratio(input_folder, output=output_folder,
-                       seed=42, ratio=(.7, .2, .1), group_prefix=None)
+                    seed=42, ratio=(.7, .1, .2), group_prefix=None)
+    #                           (train, val, test)
 
-    input_folder = './data_simple/women'
-    output_folder = "./data_simple/split/women"
+    input_folder = os.path.join(current_dir,'../../data_simple/women/')
+    output_folder = os.path.join(current_dir,'../../data_split_resize/women/')
 
     isExist = os.path.exists(output_folder)
     if isExist:
         shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
         os.makedirs(output_folder)
     splitfolders.ratio(input_folder, output=output_folder,
-                       seed=42, ratio=(.7, .2, .1), group_prefix=None)
+                    seed=42, ratio=(.7, .1, .2), group_prefix=None)
+    #                           (train, val, test)
     return None
 
 

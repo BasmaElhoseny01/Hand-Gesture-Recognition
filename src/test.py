@@ -58,7 +58,7 @@ def main(argv):
         print('SVM Results saved')
 
 
-     # Step(4) Load our model SVM
+    # Step(4_1) Load our model (Random Forest)
     if(model_option=="both" or model_option=="rf"):  
         filename = "../models/Trained_RF.joblib"
         loaded_model = joblib.load(filename)

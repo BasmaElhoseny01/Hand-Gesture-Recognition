@@ -11,67 +11,65 @@ def main(argv):
     print("Resize", new_size)
 
     current_dir=os.path.dirname(os.path.realpath(__file__))
-    for j in ['test', 'val', 'train']:
-        print(j)
 
-        for i in range(0, 6):
-            print(i)
-            path = os.path.join(current_dir,'../../data_simple/split/men/'+j+'/'+str(i)+'/')
-            path_result = os.path.join(current_dir,'../../data_split_resize/men/'+j+'/'+str(i)+'/')
+    for i in range(0, 6):
+        print(i)
+        path = os.path.join(current_dir,'../../data/men/'+'/'+str(i)+'/')
+        path_result = os.path.join(current_dir,'../../data_resize/men/'+'/'+str(i)+'/')
 
-            print("Resizing images in "+path)
-            print("dist", path_result)
+        print("Resizing images in "+path)
+        print("dist", path_result)
 
-            isExist = os.path.exists(path)
+        isExist = os.path.exists(path)
 
-            if not isExist:
-                print("The directory doesn't exist !!", path)
-                break
+        if not isExist:
+            print("The directory doesn't exist !!", path)
+            break
 
-            isExist = os.path.exists(path_result)
-            if not isExist:
-                os.makedirs(path_result)
-                print("The new directory is created!")
-            else:
-                shutil.rmtree(path_result, ignore_errors=False, onerror=None)
-                os.mkdir(path_result)
+        isExist = os.path.exists(path_result)
+        if not isExist:
+            os.makedirs(path_result)
+            print("The new directory is created!")
+        else:
+            shutil.rmtree(path_result, ignore_errors=False, onerror=None)
+            os.mkdir(path_result)
 
-            for filename in os.listdir(path):
-                print(filename)
-                img = cv2.imread(path+str(filename))
-                if img is None:
-                    continue
-                img = cv2.resize(img, new_size)
-                cv2.imwrite(path_result+str(filename), img)
+        for filename in os.listdir(path):
+            print(filename)
+            img = cv2.imread(path+str(filename))
+            if img is None:
+                continue
+            img = cv2.resize(img, new_size)
+            cv2.imwrite(path_result+str(filename), img)
 
-            # Women
-            path = os.path.join(current_dir,'../../data_simple/split/women/'+j+'/'+str(i)+'/')
-            path_result = os.path.join(current_dir,'../../data_split_resize/women/'+j+'/'+str(i)+'/')
+        # Women
+        path = os.path.join(current_dir,'../../data/women/'+'/'+str(i)+'/')
+        path_result = os.path.join(current_dir,'../../data_resize/women/'+'/'+str(i)+'/')
 
-            print("Resizing images in "+path)
-            print("dist", path_result)
+        print("Resizing images in "+path)
+        print("dist", path_result)
 
-            isExist = os.path.exists(path)
+        isExist = os.path.exists(path)
 
-            if not isExist:
-                print("The directory doesn't exist !!", path)
-                break
+        if not isExist:
+            print("The directory doesn't exist !!", path)
+            break
 
-            isExist = os.path.exists(path_result)
-            if not isExist:
-                os.makedirs(path_result)
-                print("The new directory is created!")
-            else:
-                shutil.rmtree(path_result, ignore_errors=False, onerror=None)
-                os.mkdir(path_result)
+        isExist = os.path.exists(path_result)
+        if not isExist:
+            os.makedirs(path_result)
+            print("The new directory is created!")
+        else:
+            shutil.rmtree(path_result, ignore_errors=False, onerror=None)
+            os.mkdir(path_result)
 
-            for filename in os.listdir(path):
-                print(filename)
-                img = cv2.imread(path+str(filename))
-                if img is None:
-                    continue
-                img = cv2.resize(img, new_size)
-                cv2.imwrite(path_result+str(filename), img)
+        for filename in os.listdir(path):
+            print(filename)
+            img = cv2.imread(path+str(filename))
+            if img is None:
+                continue
+            img = cv2.resize(img, new_size)
+            cv2.imwrite(path_result+str(filename), img)
 
     return
 
