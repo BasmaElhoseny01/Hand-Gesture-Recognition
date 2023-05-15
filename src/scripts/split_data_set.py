@@ -52,7 +52,7 @@ def split_data_simple():
                     seed=42, ratio=(.7, .1, .2), group_prefix=None)
     #                           (train, val, test)
 
-    input_folder = os.path.join(current_dir,'../../data_simple/women/')
+    input_folder = os.path.join(current_dir,'../../data_resize/women/')
     output_folder = os.path.join(current_dir,'../../data_split_resize/women/')
 
     isExist = os.path.exists(output_folder)
