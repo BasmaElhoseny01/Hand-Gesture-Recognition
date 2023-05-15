@@ -53,6 +53,16 @@ def preprocessing(images,option, debug=False):
                     img_grey=np.moveaxis(img_grey,[2],[0])#-> swap axes to be 1*128*286  2<->0
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)]=np.append(hands[str(i)],img_grey,axis=0)
+            elif(option=="6"):
+                img_grey=preprocessing_yasmine(img)
+                if(hands[str(i)] is None):
+                    hands[str(i)]=np.array([img_grey]) #1* 128*256
+                else:
+                    # print('hands[str(i)]',np.shape(hands[str(i)]))
+                    img_grey=np.atleast_3d(img_grey)#128*286*1 
+                    img_grey=np.moveaxis(img_grey,[2],[0])#-> swap axes to be 1*128*286  2<->0
+                    # print('img_hand',np.shape(img_hand))
+                    hands[str(i)]=np.append(hands[str(i)],img_grey,axis=0)
             else:
                 print("Wrong Preprocessing Option!!!",option)
                 raise TypeError("Wrong Preprocessing Option")
@@ -65,7 +75,7 @@ def preprocessing(images,option, debug=False):
         classification=None
     elif(option=="2"):
         images=None
-    elif(option=="3" or option=="4" or option=="5"):
+    elif(option=="3" or option=="4" or option=="5" or option=="6"):
         images=hands
 
     return OCR,classification,images
@@ -249,7 +259,50 @@ def Grey_Scale_Preprocessing(img):
     return img
 ################################################################################
 
+def preprocessing_yasmine(img, debug=False):
+    '''
+        -Remove Shadow
+        @param img:bgr img
+    ''' 
+    # Shadow removal
+    shadow_removed = shadow_remove(img)
+    # shadow_removed = cv2.cvtColor(shadow_removed, cv2.COLOR_RGB2GRAY)
 
+    # shadow_removed_gamma=gammaCorrection(shadow_removed,0.4)
+    # print(np.max(shadow_removed))
+    # print(np.min(shadow_removed))
+    # threshold = getThreshold(shadow_removed)
+    # print(threshold)
+    # _,segmented_image = cv2.threshold(shadow_removed,10,255,cv2.THRESH_BINARY)
+    # segmented_image = getSegmentedImage(shadow_removed, 100)
+    # shadow_removed[shadow_removed < 50] = 0 
+    # segmented_image = np.copy(shadow_removed)
+    # segmented_image[segmented_image <= 225] = 0
+    # segmented_image[segmented_image > 225] = 255
+    # threshold = getThreshold(shadow_removed_gamma)
+    # print(threshold)
+
+    # contours, hierarchy = cv2.findContours(shadow_removed_gamma, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # cv2.drawContours(shadow_removed_gamma, contours, -1, 255, 3)
+
+     # Cleaning up mask using Gaussian Filter
+    # gaussian_shadow = cv2.GaussianBlur(shadow_removed_gamma, (7, 7), 0)
+    # median_shadow = cv2.medianBlur(shadow_removed_gamma,9)
+
+    # edges = cv2.Canny(shadow_removed_gamma, 100,150)
+
+    # shadow_removed[shadow_removed != np.max(shadow_removed)] = np.min(shadow_removed)
+    # shadow_anded = None; cv2.bitwise_and(img, shadow_removed, shadow_anded)
+
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # S = img[:,:,1]
+
+    if(debug):
+        show_images([shadow_removed],['shadow_removed'])
+ 
+    return shadow_removed
+
+################################################################################
 # UTILITIES
 def RGB_Mask(img):
     '''
@@ -349,7 +402,7 @@ def shadow_remove(img):
     result_norm_planes = []
     for plane in rgb_planes:
         dilated_img = cv2.dilate(plane, np.ones((7,7), np.uint8))
-        bg_img = cv2.medianBlur(dilated_img, 21)
+        bg_img = cv2.medianBlur(dilated_img, 9)
         diff_img = 255 - cv2.absdiff(plane, bg_img)
         # print(diff_img)
         norm_img = cv2.normalize(diff_img,None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
