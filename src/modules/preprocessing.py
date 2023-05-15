@@ -260,47 +260,47 @@ def Grey_Scale_Preprocessing(img):
 ################################################################################
 
 def preprocessing_yasmine(img, debug=False):
-    '''
-        -Remove Shadow
-        @param img:bgr img
-    ''' 
-    # Shadow removal
-    shadow_removed = shadow_remove(img)
-    # shadow_removed = cv2.cvtColor(shadow_removed, cv2.COLOR_RGB2GRAY)
+    
+    # convert image from BGR to HSV and GRAYSCALE
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # shadow_removed_gamma=gammaCorrection(shadow_removed,0.4)
-    # print(np.max(shadow_removed))
-    # print(np.min(shadow_removed))
-    # threshold = getThreshold(shadow_removed)
-    # print(threshold)
-    # _,segmented_image = cv2.threshold(shadow_removed,10,255,cv2.THRESH_BINARY)
-    # segmented_image = getSegmentedImage(shadow_removed, 100)
-    # shadow_removed[shadow_removed < 50] = 0 
-    # segmented_image = np.copy(shadow_removed)
-    # segmented_image[segmented_image <= 225] = 0
-    # segmented_image[segmented_image > 225] = 255
-    # threshold = getThreshold(shadow_removed_gamma)
-    # print(threshold)
+    # extract the S channel from HSV
+    S = img_hsv[:,:,1]
 
-    # contours, hierarchy = cv2.findContours(shadow_removed_gamma, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # cv2.drawContours(shadow_removed_gamma, contours, -1, 255, 3)
+    # get threshold for each image seperately
+    threshold = getThreshold(S)
+    
+    # apply threshhold on image
+    s_threshold =  cv2.inRange(S, threshold, 255)
 
-     # Cleaning up mask using Gaussian Filter
-    # gaussian_shadow = cv2.GaussianBlur(shadow_removed_gamma, (7, 7), 0)
-    # median_shadow = cv2.medianBlur(shadow_removed_gamma,9)
+    # Region Filling 
+    # fill empty regions if hand mask
+    img_fill=s_threshold.copy()
+    h,w=s_threshold.shape[:2]
+    mask=np.zeros((h+2,w+2),np.uint8)
 
-    # edges = cv2.Canny(shadow_removed_gamma, 100,150)
+    cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
+    region_filling=cv2.bitwise_not(mask)
+    region_filling[region_filling == 255] = 255
+    region_filling[region_filling == 254] = 0
 
-    # shadow_removed[shadow_removed != np.max(shadow_removed)] = np.min(shadow_removed)
-    # shadow_anded = None; cv2.bitwise_and(img, shadow_removed, shadow_anded)
+    # resize region filled mask to be compatable with original image size
+    region_filling = region_filling[0:img_gray.shape[0], 0:img_gray.shape[1]]
 
-    # img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # S = img[:,:,1]
+    # and the hand mask with the gray image
+    img_anded = cv2.bitwise_and(img_gray, region_filling)
+
 
     if(debug):
-        show_images([shadow_removed],['shadow_removed'])
+        print(np.max(region_filling))
+        print(np.min(region_filling))
+        print(img_gray.shape)
+        print(region_filling.shape)
+        print(threshold)
+        show_images([S, s_threshold, region_filling, img_anded],['s_channel', 'thresholded', 'filled_regions', 'image_anded'])
  
-    return shadow_removed
+    return img_anded
 
 ################################################################################
 # UTILITIES
