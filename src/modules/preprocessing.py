@@ -97,9 +97,29 @@ def preprocessing(images, option, debug=False):
     return OCR, classification, images
 
 
-# 33
-def yarab(img,debug=False):
-    'img bgr'
+def yarab(img,debug=False,path=""):
+    '''
+    -YCRCB
+    -Flip
+    -mask YCRCB
+    @param img bgr
+
+    '''
+
+    #YCRCB
+    YCrCb_mask=YCrCb_Mask(img)
+
+
+    #Flip
+    flipped_original=np.copy(img)
+    _,_,_,flipped_img,flipped_original=flip_horizontal(YCrCb_mask,debug=False,Original=flipped_original)
+
+    #Mask
+    masked_img = cv2.bitwise_and(flipped_original,flipped_original,mask = flipped_img)
+    if(debug):
+        show_images([cv2.cvtColor(img,cv2.COLOR_BGR2RGB),YCrCb_mask,flipped_original,masked_img],['Original','YCrCb_mask','flipped_original','masked_img'],save=True,path_save=path)
+    result=masked_img
+
 
     # #Without
     # not_removed_shadow=np.copy(img)
@@ -121,16 +141,16 @@ def yarab(img,debug=False):
 
     #########################
 
-    mask=calculate_mask(org_image=img,ab_threshold=0,region_adjustment_kernel_size=10)
+    # mask=calculate_mask(org_image=img,ab_threshold=0,region_adjustment_kernel_size=10)
     # # print(np.max(mask))
 
     # #Apply mask
-    removed_shadow=img
-    removed_shadow[mask==255]=0
+    # removed_shadow=img
+    # removed_shadow[mask==255]=0
 
     # #Apply Ycrcb mask
     # RGB_mask=RGB_Mask(removed_shadow).astype(np.uint8)
-    YCrCb_mask=YCrCb_Mask(removed_shadow)
+    # YCrCb_mask=YCrCb_Mask(removed_shadow)
     # RGB_mask=YCrCb_mask
     # print(np.sum(RGB_mask>255))
 
@@ -142,7 +162,7 @@ def yarab(img,debug=False):
     # print('mask',np.shape(RGB_mask))
 
     # masked_img = cv2.bitwise_and(img,img,mask = RGB_mask)
-    result=YCrCb_mask
+    # result=YCrCb_mask
 
     # #Apply rgb mask
     
@@ -460,7 +480,7 @@ def RGB_Mask(img):
     return RGB_Rule
 
 
-def flip_horizontal(img, debug=False):
+def flip_horizontal(img, debug=False,Original=None):
     '''
     img:Binary image
     Adjust Orientation of the hand Horizontally
@@ -485,6 +505,10 @@ def flip_horizontal(img, debug=False):
         max_x_ind = np.shape(img)[1]-max_x_ind
         min_x_ind = np.shape(img)[1]-min_x_ind
         OCR = np.flip(OCR)
+        if(Original is not None):
+            Original_fliped=cv2.flip(Original,1)
+    else:
+        Original_fliped=Original
 
     if (debug):
         print("Image Size", np.shape(img))
@@ -515,7 +539,7 @@ def flip_horizontal(img, debug=False):
         plt.show()
         show_images([img], ['Flipped'])
 
-    return OCR, max_x_ind, min_x_ind, img
+    return OCR, max_x_ind, min_x_ind, img,Original_fliped
 
 
 def shadow_remove(img):
