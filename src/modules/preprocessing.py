@@ -5,7 +5,7 @@ from utils import *
 
 def preprocessing(images,option, debug=False):
     #SIZE_OF_IMAGE:
-    OCR=np.empty((0,IMG_SIZE[1]),int)
+    OCR=np.empty((0,IMG_SIZE[0]),int)
     classification=[]
     hands = {'0': None, '1':None, '2':None,
               '3': None, '4': None, '5': None}
