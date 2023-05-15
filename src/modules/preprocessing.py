@@ -54,15 +54,25 @@ def preprocessing(images,option, debug=False):
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)]=np.append(hands[str(i)],img_grey,axis=0)
             elif(option=="6"):
-                img_grey=preprocessing_yasmine(img)
+                s_channel=sChannelPreprocessing(img)
                 if(hands[str(i)] is None):
-                    hands[str(i)]=np.array([img_grey]) #1* 128*256
+                    hands[str(i)]=np.array([s_channel]) #1* 128*256
                 else:
                     # print('hands[str(i)]',np.shape(hands[str(i)]))
-                    img_grey=np.atleast_3d(img_grey)#128*286*1 
-                    img_grey=np.moveaxis(img_grey,[2],[0])#-> swap axes to be 1*128*286  2<->0
+                    s_channel=np.atleast_3d(s_channel)#128*286*1 
+                    s_channel=np.moveaxis(s_channel,[2],[0])#-> swap axes to be 1*128*286  2<->0
                     # print('img_hand',np.shape(img_hand))
-                    hands[str(i)]=np.append(hands[str(i)],img_grey,axis=0)
+                    hands[str(i)]=np.append(hands[str(i)],s_channel,axis=0)
+            elif(option=="yasmine"):
+                s_channel_mask=preprocessing_yasmine(img)
+                if(hands[str(i)] is None):
+                    hands[str(i)]=np.array([s_channel_mask]) #1* 128*256
+                else:
+                    # print('hands[str(i)]',np.shape(hands[str(i)]))
+                    s_channel_mask=np.atleast_3d(s_channel_mask)#128*286*1 
+                    s_channel_mask=np.moveaxis(s_channel_mask,[2],[0])#-> swap axes to be 1*128*286  2<->0
+                    # print('img_hand',np.shape(img_hand))
+                    hands[str(i)]=np.append(hands[str(i)],s_channel_mask,axis=0)
             else:
                 print("Wrong Preprocessing Option!!!",option)
                 raise TypeError("Wrong Preprocessing Option")
@@ -75,7 +85,7 @@ def preprocessing(images,option, debug=False):
         classification=None
     elif(option=="2"):
         images=None
-    elif(option=="3" or option=="4" or option=="5" or option=="6"):
+    elif(option=="3" or option=="4" or option=="5" or option=="6" or option=="yasmine"):
         images=hands
 
     return OCR,classification,images
@@ -258,6 +268,18 @@ def Grey_Scale_Preprocessing(img):
     img=cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
 ################################################################################
+def sChannelPreprocessing(img,debug=False):
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # extract the S channel from HSV
+    S = img_hsv[:,:,1]
+
+    if(debug):
+        show_images([S],['s_channel'])
+ 
+    return S
+
+################################################################################
 
 def preprocessing_yasmine(img, debug=False):
     
@@ -290,6 +312,7 @@ def preprocessing_yasmine(img, debug=False):
 
     # and the hand mask with the gray image
     img_anded = cv2.bitwise_and(img_gray, region_filling)
+    # img_anded = cv2.cvtColor(img_anded, cv2.COLOR_GRAY2BGR)
 
 
     if(debug):
