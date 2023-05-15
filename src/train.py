@@ -40,7 +40,7 @@ def main(argv):
         np.save('../models/visual_words.npy',visual_words)
 
     else:
-        X_train,Y_train=extract_features(train_images,feature_extractor_option)
+        X_train,Y_train=extract_features(train_images,feature_extractor_option,train=True)
     print('Features Extracted')
     train_images = None
 

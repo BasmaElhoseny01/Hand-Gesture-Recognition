@@ -24,5 +24,3 @@ python ./test.py %1 %2 %3
 IF %ERRORLEVEL% NEQ 0 (Echo An error was found &Exit /b 1)
 python ./evaluate.py %1 %2 %3
 IF %ERRORLEVEL% NEQ 0 (Echo An error was found &Exit /b 1)
-
-

@@ -35,7 +35,7 @@ def main(argv):
         X_test,Y_test,_=extract_features(test_images,feature_extractor_option,train=False,visual_words=visual_words)
 
     else:
-        X_test,Y_test=extract_features(test_images,feature_extractor_option)
+        X_test,Y_test=extract_features(test_images,feature_extractor_option,train=False)
     print('Features Extracted')
     test_images = None
 
