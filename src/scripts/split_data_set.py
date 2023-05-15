@@ -39,7 +39,7 @@ def pick_random(source, destination, ratio=8):
     return None
 
 
-def split_data_simple():
+def split_data_simple(seed=42):
     current_dir=os.path.dirname(os.path.realpath(__file__))
     input_folder = os.path.join(current_dir,'../../data_resize/men/')
     output_folder = os.path.join(current_dir,'../../data_split_resize/men/')
@@ -60,7 +60,7 @@ def split_data_simple():
         shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
         os.makedirs(output_folder)
     splitfolders.ratio(input_folder, output=output_folder,
-                    seed=42, ratio=(.7, .1, .2), group_prefix=None)
+                    seed=seed, ratio=(.7, .1, .2), group_prefix=None)
     #                           (train, val, test)
     return None
 
@@ -93,7 +93,7 @@ def main(argv):
 
             if currentArgument in ("-t", "--split"):
                 print("Splitting Simple Data Set")
-                split_data_simple()
+                split_data_simple(values[0])
                 return
 
             # if currentArgument in ("-i", "--large"):
