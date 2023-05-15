@@ -25,11 +25,13 @@ print('Features Extracted')
 test_images = None
 
 # Step(4) Load our model
-filename = "Trained_SVM.joblib"
+filename = "Trained_RF.joblib"
 loaded_model = joblib.load(filename)
 print('Model loaded')
 
 # Step(5) Evaluate the results
+# result = loaded_model.predict(X_test)
+
 result = loaded_model.predict(X_test)
 print('Results evaluated')
 

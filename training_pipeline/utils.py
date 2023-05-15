@@ -10,6 +10,8 @@ from sklearn.metrics import accuracy_score
 from skimage.feature import hog
 from skimage.transform import resize
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from itertools import compress
 import joblib
 import shutil
 import os
