@@ -108,7 +108,7 @@ def read_images_test(path_data_folder, type="train"):
 
     return images
 
-def read_images(path_data_folder, debug=False):
+def read_images_train(path_data_folder, debug=False):
     """
     Read images for men and women
     """

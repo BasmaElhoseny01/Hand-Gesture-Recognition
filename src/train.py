@@ -14,7 +14,7 @@ def main(argv):
     # Step(1) Read Images
     print("Loading Files ...")
     training_path = '../data_split_resize/'
-    train_images = read_images(training_path)
+    train_images = read_images_train(training_path)
     print("Files loaded")
 
 
