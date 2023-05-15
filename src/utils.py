@@ -22,7 +22,8 @@ import os
 import joblib
 import sys
 
-
+def test_import():
+    print("Hello From utils")
 def show_images(images, titles=None, save=False, path_save=""):
     """
     This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
