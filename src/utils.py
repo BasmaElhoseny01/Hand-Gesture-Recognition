@@ -261,6 +261,7 @@ def getThreshold(image):
     """
         Documentation
     """
+    counter = 0
     image = image.astype(np.uint8)
     counts,bins = getGraylevelCounts(image)
     cumulativecount = np.cumsum(counts)
@@ -269,13 +270,17 @@ def getThreshold(image):
     threshold = round(np.sum(np.multiply(counts,bins)/cumulativecount[-1]))
 
     while(threshold != t_old):
+        if(counter > 256):
+            break
+        counter +=1
         t_old = threshold
         low = list(range(0,t_old))
         high = list(range(t_old+1, 256))
-        t_low = round(np.sum(np.multiply(counts[0:t_old], low))/cumulativecount[t_old-1])
-        t_high = round(np.sum(np.multiply(counts[t_old+1:256],high))/(cumulativecount[-1]-cumulativecount[t_old+1]))
-        threshold = round((t_low + t_high)/2)
-
+        t_low = np.sum(np.multiply(counts[0:t_old], low))//cumulativecount[t_old-1]
+        t_high = np.sum(np.multiply(counts[t_old+1:256],high))//(cumulativecount[-1]-cumulativecount[t_old+1])
+        threshold = round((t_low + t_high)//2)
+        # print("old threshold",str(t_old)) 
+        # print("new threshold",str(threshold)) 
     return threshold
 
 def gammaCorrection(src,gamma):

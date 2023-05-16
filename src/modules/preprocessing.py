@@ -64,7 +64,8 @@ def preprocessing(images,option, debug=False):
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)]=np.append(hands[str(i)],s_channel,axis=0)
             elif(option=="yasmine"):
-                print(str(i))
+                # print("i: ",str(i))
+                # print("index: ",str(index))
                 # s_channel_mask=preprocessing_yasmine(img)
                 # if(hands[str(i)] is None):
                 #     hands[str(i)]=np.array([s_channel_mask]) #1* 128*256
@@ -299,23 +300,31 @@ def preprocessing_yasmine(img, debug=False):
     # equalize v channel hsv 
     # img_hsv_equalized = equalizeV(img_hsv)
 
+    print(1)
     # extract the S channel from HSV
     s_channel = img_hsv[:,:,1]
+    print(2)
 
     # extract the V channel from HSV
     v_channel = img_hsv[:,:,2]
+    print(3)
 
     # get threshold for each image seperately
     s_threshold = getThreshold(s_channel)
+    print(4)
 
     # get threshold for each image seperately
     v_threshold = getThreshold(v_channel)
+    print(5)
+
 
     # apply threshhold on image
     s_thresholded =  cv2.inRange(s_channel, s_threshold, 255)
+    print(6)
     
     # apply threshhold on image
     v_thresholded =  cv2.inRange(v_channel, v_threshold, 255)
+    print(7)
 
     # hsv_thresholded = cv2.inRange(img_hsv, (0,s_threshold, v_threshold), (0, 255, 255))
 
@@ -340,12 +349,18 @@ def preprocessing_yasmine(img, debug=False):
 
     # img_anded = cv2.bitwise_and(img, img, mask=region_filling)
     s_and_v = cv2.bitwise_and(s_thresholded, v_thresholded)
+    print(8)
+
     # v_inverted = cv2.bitwise_not(v_thresholded)
     # s_and_vinv = cv2.bitwise_and(s_thresholded, v_inverted)
     # img_ored = cv2.bitwise_or(s_thresholded, v_thresholded)
 
     if(np.sum(s_and_v)//255 < 0.25*s_and_v.shape[0]*s_and_v.shape[1]):
         s_and_v = s_thresholded
+        print(9)
+    print(10)
+
+
 
     # Region Filling 
     # fill empty regions if hand mask
@@ -363,11 +378,17 @@ def preprocessing_yasmine(img, debug=False):
     # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
     edge_closing = cv2.morphologyEx(s_and_v, cv2.MORPH_CLOSE, kernel, iterations=2) # erode
 
+    print(11)
+
+
     # img_anded = cv2.bitwise_and(img, img, mask=edge_closing)
 
     _, _, _, mask_flipped, original_fliped = flip_horizontal(img=edge_closing, Original=img)
+    print(12)
+
 
     img_anded = cv2.bitwise_and(original_fliped, original_fliped, mask=mask_flipped)
+    print(13)
 
     if(debug):
         # show_images([s_channel, v_channel, s_thresholded, v_thresholded, region_filling, img_ored, s_and_vinv],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 'region_filling', 'oring', 's_and_vinv'])
@@ -403,63 +424,6 @@ def RGB_Mask(img):
    
 
     return RGB_Rule
-
-# def flip_horizontal(img,debug=False):
-#     '''
-#     img:Binary image
-#     Adjust Orientation of the hand Horizontally
-#     '''
-
-#     #Compute OCR
-#     OCR = np.sum(img,axis=0)
-
-
-#     #Get Max index
-#     res=list(compress(range(len(OCR==np.max(OCR))),OCR==np.max(OCR)))
-#     max_x_ind=res[0]
-
-#     #Get Min index
-#     result = min(enumerate(OCR), key=lambda x: x[1] if x[1] > 20 else float('inf'))  #CHECK: Handle inf case
-#     # print("Position : {}, Value : {}".format(*result))
-#     min_x_ind=result[0]
-
-
-#     if(min_x_ind>max_x_ind):
-#         img=cv2.flip(img,1) #1=horizontally
-#         max_x_ind=np.shape(img)[1]-max_x_ind
-#         min_x_ind=np.shape(img)[1]-min_x_ind 
-#         OCR=np.flip(OCR)
-      
-
-
-#     if(debug):
-#         print("Image Size",np.shape(img))
-#         print("OCR shape",np.shape(OCR))
-#         print("Max x is at",max_x_ind)
-#         print("Min x is at",min_x_ind)
-
-#         # x-coordinates of left sides of bars 
-#         left = range(0,np.shape(OCR)[0])
-#         print("X Range",left)
-        
-#         # heights of bars
-#         height = OCR
-#         print("Heights",height)
-
-#         # plotting a bar chart
-#         plt.bar(left, height,
-#                 width = 0.1, color = ['red', 'green'])
-        
-#         # naming the x-axis
-#         plt.xlabel('x - axis')
-#         # naming the y-axis
-#         plt.ylabel('y - axis')
-#         # plot title
-#         plt.title('My bar chart!')
-        
-#         # function to show the plot
-#         plt.show()
-#         show_images([img],['Flipped'])
 
 def flip_horizontal(img, debug=False, Original=None):
     '''
