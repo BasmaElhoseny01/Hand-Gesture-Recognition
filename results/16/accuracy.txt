@@ -1,0 +1,5 @@
+preprocessing_option: basma1
+feature_extractor_option: hog
+model_option: both
+RF: 0.68
+SVM: 0.7413333333333333

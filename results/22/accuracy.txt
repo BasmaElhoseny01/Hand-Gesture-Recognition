@@ -1,0 +1,5 @@
+preprocessing_option: shadow
+feature_extractor_option: hog
+model_option: both
+RF: 0.7546666666666667
+SVM: 0.8133333333333334

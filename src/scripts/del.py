@@ -11,11 +11,11 @@ import splitfolders
 def main():
     
     current_dir=os.path.dirname(os.path.realpath(__file__))
-    root_dir=current_dir+'/../../data_split_resize'
+    root_dir=current_dir+'/../../data_resize'
     print("root_dir:",root_dir)
 
-    # del_images=['1_men (2).JPG']
-    del_images=[]
+    del_images=['0_men (1).JPG']
+    # del_images=[]
     print("Moving",del_images)
 
     dst_dir=os.path.join(root_dir,"outliers")

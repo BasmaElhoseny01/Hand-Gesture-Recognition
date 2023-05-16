@@ -1,0 +1,5 @@
+preprocessing_option: ycrcb
+feature_extractor_option: hog
+model_option: both
+RF: 0.752
+SVM: 0.7973333333333333
