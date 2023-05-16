@@ -234,3 +234,50 @@ def draw_keypoints(img, keypoints, color=(255), radius=8, thickness=-1):
                    radius=radius, thickness=thickness)
 
     return img
+
+def getSegmentedImage(image, threshold):
+    """
+        Documentation
+    """
+    segmented_image = np.copy(image)
+    segmented_image[segmented_image <= threshold] = 0
+    segmented_image[segmented_image > threshold] = 255
+    return segmented_image
+
+def getGraylevelCounts(image):
+    """
+        Documentation
+    """
+    histImage = histogram(image)  
+    frequency = histImage[0]; bins = histImage[1]
+    graylevels = np.zeros(256).astype(int)
+    counts = np.zeros(256).astype(int)
+    
+    for i in range (0,256):
+        graylevels[i] = i
+    
+    for i in range (0,frequency.shape[0]):
+        counts[bins[i]] = frequency[i]
+
+    return counts,graylevels
+
+def getThreshold(image):
+    """
+        Documentation
+    """
+    image = image.astype(np.uint8)
+    counts,bins = getGraylevelCounts(image)
+    cumulativecount = np.cumsum(counts)
+    t_old = 0
+
+    threshold = round(np.sum(np.multiply(counts,bins)/cumulativecount[-1]))
+
+    while(threshold != t_old):
+        t_old = threshold
+        low = list(range(0,t_old))
+        high = list(range(t_old+1, 256))
+        t_low = round(np.sum(np.multiply(counts[0:t_old], low))/cumulativecount[t_old-1])
+        t_high = round(np.sum(np.multiply(counts[t_old+1:256],high))/(cumulativecount[-1]-cumulativecount[t_old+1]))
+        threshold = round((t_low + t_high)/2)
+
+    return threshold
