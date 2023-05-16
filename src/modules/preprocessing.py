@@ -58,198 +58,112 @@ def preprocessing(images, option, debug=False):
                     img_grey = np.moveaxis(img_grey, [2], [0])
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)] = np.append(hands[str(i)], img_grey, axis=0)
-            elif(option=='basma1'):
-                ####Binaryyyyyyyyyyyy
-                img_hand = yarab(img)
-                cv2.imwrite('D:/Hand-Gesture-Recognition/preprocessing_results/' +
-                            str(i)+'_'+str(j_write)+'.jpg', img_hand)
-                j_write = j_write+1
-                if (hands[str(i)] is None):
-                    hands[str(i)] = np.array([img_hand])  # 1* 128*256
-                else:
-                    # print('hands[str(i)]',np.shape(hands[str(i)]))
-                    img_hand = np.atleast_3d(img_hand)  # 128*286*1
-                    # -> swap axes to be 1*128*286  2<->0
-                    img_hand = np.moveaxis(img_hand, [2], [0])
-                    # print('img_hand',np.shape(img_hand))
-                    hands[str(i)] = np.append(hands[str(i)], img_hand, axis=0)
-            elif (option == "basma"):
-                #COLOR///////
-                images[str(i)][index] = yarab(img)
-                cv2.imwrite('D:/Hand-Gesture-Recognition/preprocessing_results/' +
-                        str(i)+'_'+str(j_write)+'.jpg', images[str(i)][index] )
-                j_write = j_write+1                
+            elif (option == "shadow"):
+                # BGR image :D
+                images[str(i)][index] = remove_shadow_Ycrcb(img)
+            elif (option == "ycrcb"):
+                images[str(i)][index] = YCrCb(img)
             else:
                 print("Wrong Preprocessing Option!!!", option)
                 raise TypeError("Wrong Preprocessing Option")
             index += 1
 
-        # images[str(i)] = None  # Deallocate for Memory
+        if (option not in ["shadow", "ycrcb"]):
+            images[str(i)] = None  # Deallocate for Memory
 
     if (option == "1"):
         OCR = None
         classification = None
     elif (option == "2"):
         images = None
-    elif (option == "3" or option == "4" or option == "5" or option=="basma1"):
+    elif (option == "3" or option == "4" or option == "5"):
         images = hands
 
     return OCR, classification, images
 
 
-def yarab(img,debug=False,path=""):
-    '''
-    -YCRCB
-    -Flip
-    -mask YCRCB
-    @param img bgr
-
-    '''
-
-    #YCRCB
-    YCrCb_mask=YCrCb_Mask(img)
-
-
-    #Flip
-    flipped_original=np.copy(img)
-    _,_,_,flipped_img,flipped_original=flip_horizontal(YCrCb_mask,debug=False,Original=flipped_original)
-
-    #Mask
-    masked_img = cv2.bitwise_and(flipped_original,flipped_original,mask = flipped_img)
-    if(debug):
-        show_images([cv2.cvtColor(img,cv2.COLOR_BGR2RGB),YCrCb_mask,flipped_original,masked_img],['Original','YCrCb_mask','flipped_original','masked_img'],save=True,path_save=path)
-    result=masked_img
-
-
-    # #Without
-    # not_removed_shadow=np.copy(img)
-    # #Apply Ycrcb mask
-    # not_YCrCb_mask = YCrCb_Mask(img)
-
-
-    # #Mask 
-    # masked_img = cv2.bitwise_and(img,img,mask = not_YCrCb_mask)
-    # result=masked_img
-
-    # result=not_YCrCb_mask
-    # if(debug):
-    #     show_images([ cv2.cvtColor(img, cv2.COLOR_BGR2RGB),not_YCrCb_mask],['Org','not_YCrCb_mask','not_RGB_mask'])
-
-    # # #Apply rgb mask
-    # not_RGB_mask=RGB_Mask(img)
-    # result=not_RGB_mask
-
-    #########################
-
-    # mask=calculate_mask(org_image=img,ab_threshold=0,region_adjustment_kernel_size=10)
-    # # print(np.max(mask))
-
-    # #Apply mask
-    # removed_shadow=img
-    # removed_shadow[mask==255]=0
-
-    # #Apply Ycrcb mask
-    # RGB_mask=RGB_Mask(removed_shadow).astype(np.uint8)
-    # YCrCb_mask=YCrCb_Mask(removed_shadow)
-    # RGB_mask=YCrCb_mask
-    # print(np.sum(RGB_mask>255))
-
-    # Mask 
-    # print('type',type(RGB_mask))
-    # print('type_',type(RGB_mask[0][0]))
-
-    # print('img',np.shape(img))
-    # print('mask',np.shape(RGB_mask))
-
-    # masked_img = cv2.bitwise_and(img,img,mask = RGB_mask)
-    # result=YCrCb_mask
-
-    # #Apply rgb mask
-    
-
-    # Apply ycrcg mask
-    # show_images([ cv2.cvtColor(img, cv2.COLOR_BGR2RGB),mask, cv2.cvtColor(removed_shadow, cv2.COLOR_BGR2RGB),YCrCb_mask,RGB_mask],['Org','mask','WOOOOOOOW','YCrCb_mask','RGB_mask'],save=save, path_save=path_save_2)
-    return result
-
-
-def calculate_mask(org_image: np.ndarray,
-                   ab_threshold: int,
-                   region_adjustment_kernel_size: int) -> np.ndarray:
-    lab_img = cv2.cvtColor(org_image, cv2.COLOR_BGR2LAB)
-
-    # Convert the L,A,B from 0 to 255 to 0 - 100 and -128 - 127 and -128 - 127 respectively
-    l_range = (0, 100)
-    ab_range = (-128, 127)
-
-    lab_img = lab_img.astype('int16')
-    lab_img[:, :, 0] = lab_img[:, :, 0] * l_range[1] / 255
-    lab_img[:, :, 1] += ab_range[0]
-    lab_img[:, :, 2] += ab_range[0]
-
-    # Calculate the mean values of L, A and B across all pixels
-    means = [np.mean(lab_img[:, :, i]) for i in range(3)]
-    thresholds = [means[i] - (np.std(lab_img[:, :, i]) / 3) for i in range(3)]
-
-    # Apply threshold using only L
-    if sum(means[1:]) <= ab_threshold:
-        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
-                           (thresholds[0], ab_range[1], ab_range[1]))
-    else:  # Else, also consider B channel
-        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
-                           (thresholds[0], ab_range[1], thresholds[2]))
-
-    kernel_size = (region_adjustment_kernel_size,
-                   region_adjustment_kernel_size)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, kernel_size)
-    cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, mask)
-    cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, mask)
-
-    return mask
-#######################################################################################################
-
-
-def preprocessing_basma(img, debug=False):
+def S_channel(img, debug=False, path=""):
     ''''
-    -Remove Shadow
+    - 
+    -
+    -
+
     @param img:bgr img
     '''
-    # #Remove salt and pepper
-    # #Median blur
-    # kernel=(2,2)
-    # averageBlur=cv2.blur(img,kernel)
-
-    # Shadow removal
-    shadow_removed = shadow_remove(img)
-
-    # result=RGB_Mask(cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
-
-    # YCrCb_image = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
-    # lower_skin = (0, 135, 85)
-    # upper_skin = (255, 180, 135)
-    # skin_ycrcb= cv2.inRange(YCrCb_image, lower_skin, upper_skin)
-
-    # show_images([cv2.cvtColor(img,cv2.COLOR_BGR2RGB),result,skin_ycrcb],['Original','RGB Mask','skin_ycrcb'])
-
-    # # --------------------------------------------------------------------------------------------------------
-
-    # --------------------------------------------------------------------------------------------------------
-    # Threshold
-    # Convert to grey scale
-    img_grey = cv2.cvtColor(shadow_removed, cv2.COLOR_RGB2GRAY)
-    kernel = (5, 5)
-    blur = cv2.blur(img_grey, kernel)
-
-    shadow_removed_gamma = gammaCorrection(blur, 0.4)
-
-    th = cv2.adaptiveThreshold(
-        blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
     if (debug):
-        show_images([cv2.cvtColor(img, cv2.COLOR_BGR2RGB), shadow_removed, img_grey, blur, shadow_removed_gamma, th], ['Original', 'Blur', 'shadow_removed''img_grey', 'blur', 'shadow_removed_gamma',
-                                                                                                                       'threshold'])
+        show_images([], [], save=True, path_save=path)
 
-    result = shadow_removed
-    return result
+    return None
+
+##############################################################################################################################
+
+
+def YCrCb(img, debug=False):
+    ''''
+    - Get Mask of YCrCb
+    - Flip
+    - And Mask with BGR image
+
+    @param img:bgr img
+    '''
+
+    # ---------------------------------------------------------------------------------------------------------------
+    # YCRCB
+    YCrCb_mask = YCrCb_Mask(img)
+
+    # ---------------------------------------------------------------------------------------------------------------
+    # Flip
+    if (debug):
+        flipped_original = np.copy(img)
+    else:
+        flipped_original = img
+    _, _, _, flipped_img, flipped_original = flip_horizontal(
+        YCrCb_mask, debug=False, Original=flipped_original)
+
+    # --------------------------------------------------------------------------------------------------------------
+    # Mask Anding
+    masked_img = cv2.bitwise_and(
+        flipped_original, flipped_original, mask=flipped_img)
+
+    return masked_img
+
+##############################################################################################################################
+
+
+def remove_shadow_Ycrcb(img, debug=False):
+    '''
+    - Replace shadow area by black
+    - Get Mask of YCrCb
+    - Flip
+    - And Mask with BGR image
+    '''
+    # Shadow removal
+    shadow_mask = calculate_shadow_mask(
+        org_image=img, ab_threshold=0, region_adjustment_kernel_size=10)
+    shadow_removed = img
+    shadow_removed[shadow_mask == 255] = 0
+
+    # ---------------------------------------------------------------------------------------------------------------
+    # YCRCB
+    YCrCb_mask = YCrCb_Mask(shadow_removed)
+
+    # ---------------------------------------------------------------------------------------------------------------
+    # Flip
+    if (debug):
+        flipped_original = np.copy(img)
+    else:
+        flipped_original = img
+    _, _, _, flipped_img, flipped_original = flip_horizontal(
+        YCrCb_mask, debug=False, Original=flipped_original)
+
+    # --------------------------------------------------------------------------------------------------------------
+    # Mask Anding
+    masked_img = cv2.bitwise_and(
+        flipped_original, flipped_original, mask=flipped_img)
+    return masked_img
+
+##############################################################################################################################
 
 
 def equalizeS(img, debug=False):
@@ -290,7 +204,6 @@ def equalizeS(img, debug=False):
     # skinMask=flipped_img
 
     # Extracting skin from the threshold mask
-
     img_eq = cv2.cvtColor(skin, cv2.COLOR_HSV2BGR)  # Extracted Colored Hand
 
     return img_eq
@@ -426,6 +339,7 @@ def cut_fingers_preprocessing(img, debug=False):
         image_finger, 10, 255, cv2.THRESH_BINARY)
 
     return img_flip, image_finger
+
 ################################################################################
 
 
@@ -436,9 +350,9 @@ def Grey_Scale_Preprocessing(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
 ################################################################################
-
-
 # UTILITIES
+
+
 def YCrCb_Mask(img):
     '''
     img:bgr
@@ -459,6 +373,7 @@ def RGB_Mask(img):
 
 
     img:BGR
+    NB:RGB_Mask(removed_shadow).astype(np.uint8) Convert to unint 8 bit to be able to and it with 8UI 3 channel image
     '''
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -480,7 +395,7 @@ def RGB_Mask(img):
     return RGB_Rule
 
 
-def flip_horizontal(img, debug=False,Original=None):
+def flip_horizontal(img, debug=False, Original=None):
     '''
     img:Binary image
     Adjust Orientation of the hand Horizontally
@@ -505,10 +420,10 @@ def flip_horizontal(img, debug=False,Original=None):
         max_x_ind = np.shape(img)[1]-max_x_ind
         min_x_ind = np.shape(img)[1]-min_x_ind
         OCR = np.flip(OCR)
-        if(Original is not None):
-            Original_fliped=cv2.flip(Original,1)
+        if (Original is not None):
+            Original_fliped = cv2.flip(Original, 1)
     else:
-        Original_fliped=Original
+        Original_fliped = Original
 
     if (debug):
         print("Image Size", np.shape(img))
@@ -539,7 +454,7 @@ def flip_horizontal(img, debug=False,Original=None):
         plt.show()
         show_images([img], ['Flipped'])
 
-    return OCR, max_x_ind, min_x_ind, img,Original_fliped
+    return OCR, max_x_ind, min_x_ind, img, Original_fliped
 
 
 def shadow_remove(img):
@@ -562,6 +477,41 @@ def shadow_remove(img):
     shadow_removed = cv2.merge(result_norm_planes)
 
     return shadow_removed
+
+
+def calculate_shadow_mask(org_image: np.ndarray,
+                          ab_threshold: int,
+                          region_adjustment_kernel_size: int) -> np.ndarray:
+    lab_img = cv2.cvtColor(org_image, cv2.COLOR_BGR2LAB)
+
+    # Convert the L,A,B from 0 to 255 to 0 - 100 and -128 - 127 and -128 - 127 respectively
+    l_range = (0, 100)
+    ab_range = (-128, 127)
+
+    lab_img = lab_img.astype('int16')
+    lab_img[:, :, 0] = lab_img[:, :, 0] * l_range[1] / 255
+    lab_img[:, :, 1] += ab_range[0]
+    lab_img[:, :, 2] += ab_range[0]
+
+    # Calculate the mean values of L, A and B across all pixels
+    means = [np.mean(lab_img[:, :, i]) for i in range(3)]
+    thresholds = [means[i] - (np.std(lab_img[:, :, i]) / 3) for i in range(3)]
+
+    # Apply threshold using only L
+    if sum(means[1:]) <= ab_threshold:
+        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
+                           (thresholds[0], ab_range[1], ab_range[1]))
+    else:  # Else, also consider B channel
+        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
+                           (thresholds[0], ab_range[1], thresholds[2]))
+
+    kernel_size = (region_adjustment_kernel_size,
+                   region_adjustment_kernel_size)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, kernel_size)
+    cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, mask)
+    cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, mask)
+
+    return mask
 
 
 def cut_fingers(hand_binary, hand_center_x, raduis=150):

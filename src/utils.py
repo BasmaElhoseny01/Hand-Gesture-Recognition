@@ -91,10 +91,12 @@ def read_images_test(path_data_folder, type="train"):
     """
     # Read Images in A dictionary
     images_men = images_Dictionary(path_data_folder+"men/"+type)
-    # print(np.shape(images_men['0']))
+    print("images_men",images_men)
 
     # Add Women Images
     images_women = images_Dictionary(path_data_folder+"women/"+type)
+    print("images_women",images_women)
+
     # print(images_women)
     # print(np.shape(images_women['0']))
     images = {'0': None, '1': None, '2': None,
@@ -114,7 +116,6 @@ def read_images_train(path_data_folder, debug=False):
     """
     # Read Images in A dictionary
     images_men = images_Dictionary(path_data_folder+"men/train/", debug=debug)
-    # print(np.shape(images_men['0']))
 
     # Add Women Images
     images_women = images_Dictionary(
@@ -153,6 +154,7 @@ def images_Dictionary(path_data_folder, debug=False):
     images = {
     }  # {'0':[[img1][img2]],'1':[[img1],[img2]...],'5':[[img1][img2]]}
     for filename in os.listdir(path_data_folder):
+        # print(filename)
         # Each Subfolder
 
         path = path_data_folder + "/" + filename
@@ -165,6 +167,8 @@ def images_Dictionary(path_data_folder, debug=False):
                 if (debug):
                     show_images([img])
                 category_imgs.append(img)
+
+            print("shape",np.shape(img))
         if (images.get(filename) is None):
             images.update({filename: category_imgs})
         else:

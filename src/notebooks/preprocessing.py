@@ -26,6 +26,7 @@ for j in ['test','val','train']:
 
             #Preprocessing
             # result=preprocessing_basma(img,debug=True)
+            # Path is to sav e the results from show_images
             yarab(img,debug=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
 
             #Save Results
