@@ -34,7 +34,6 @@ for j in ['test','val','train']:
             # Path is to sav e the results from show_images
             # yarab(img,debug=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
             preprocessing_yasmine(img, debug=False,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
-
             #Save Results
             # cv2.imwrite(os.path.join(path_result,str(filename)),result)
 

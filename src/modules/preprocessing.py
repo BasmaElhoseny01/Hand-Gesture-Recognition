@@ -131,6 +131,7 @@ def YCrCb(img, debug=False):
     # ---------------------------------------------------------------------------------------------------------------
     # YCRCB
     YCrCb_mask = YCrCb_Mask(img)
+    return YCrCb_mask #Temp
 
     # ---------------------------------------------------------------------------------------------------------------
     # Flip
@@ -561,20 +562,100 @@ def sChannelPreprocessing(img,debug=False):
  
     return S
 
+def clahe(img_bgr):
+    grayscale = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    # Apply contrast limiting adaptive histogram equalization
+    clahe = cv2.createCLAHE(clipLimit=20.0, tileGridSize=(5, 50))
+    cl1 = clahe.apply(grayscale)
+    # Apply a threshold to obtain the specular mask
+    _, mask = cv2.threshold(cl1, 240, 255, cv2.THRESH_BINARY_INV)
+    # Perform morphological operations to remove small objects and fill holes
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 15))
+    mask = cv2.morphologyEx(cl1, cv2.MORPH_OPEN, kernel)
+
+    # Apply the mask to the original image to remove the specular component
+    result = cv2.bitwise_and(img_bgr, img_bgr, mask=mask)
+    return result
+
 def preprocessing_yasmine(img, debug=False,path=""):
-    
-    # convert image from BGR to HSV and GRAYSCALE
+
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # # convert image from BGR to HSV and GRAYSCALE
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    equalized = clahe.apply(img_hsv[:,:,2])
+
+
+
+    # result=cv2.merge([img_hsv[:,:,0],img_hsv[:,:,1],equalized])
+    # result=cv2.cvtColor(result, cv2.COLOR_HSV2BGR)
+
+
+
+    # Otsu's thresholding
+    ret2,th2 = cv2.threshold(equalized,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+    # Erosion
+    kernel = np.ones((4, 4), np.uint8)
+    # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
+    edge_dilate = cv2.morphologyEx(
+        th2, cv2.MORPH_DILATE, kernel, iterations=3)  # erode
+    
+
+    # Mask Anding
+    masked_img = cv2.bitwise_and(
+        img, img, mask=edge_dilate)
+    masked_img[masked_img==0]=255
+    
+    masked_img = cv2.cvtColor(masked_img, cv2.COLOR_BGR2RGB)
+
+
+    ycrcb=YCrCb(cv2.cvtColor(masked_img, cv2.COLOR_RGB2BGR))
+
+    
+    # Region Filling 
+    # fill empty regions if hand mask
+    img_fill=ycrcb.copy()
+    h,w=ycrcb.shape[:2]
+    mask=np.zeros((h+2,w+2),np.uint8)
+
+    cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
+    region_filling=cv2.bitwise_not(mask)
+    # region_filling[region_filling == 255] = 255
+    # region_filling[region_filling == 254] = 0
+
+
+
+    show_images([img_hsv[:,:,0],img_hsv[:,:,1],equalized,th2,edge_dilate,masked_img,ycrcb,region_filling],save=False,path_save=path)
+
+
+
+    # #Shadow
+    # shadow_mask = calculate_shadow_mask(
+    #     org_image=result, ab_threshold=0, region_adjustment_kernel_size=10)
+    # shadow_removed = result
+    # shadow_removed[shadow_mask == 255] = 0
+
+
+    # ycrcb=YCrCb(shadow_removed)
+
+    # show_images([cv2.cvtColor(img, cv2.COLOR_BGR2RGB),cv2.cvtColor(result, cv2.COLOR_BGR2RGB),ycrcb_or,ycrcb],(['','','Ycold','ycnew']))
+
+
+    # show_images([cv2.cvtColor(img, cv2.COLOR_BGR2RGB),img_hsv[:,:,0],img_hsv[:,:,1],img_hsv[:,:,2],result])
+    return None
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # extract the S channel from HSV
     S = img_hsv[:,:,1]
+
 
     # get threshold for each image seperately
     threshold = getThreshold(S)
     
     # apply threshhold on image
     s_threshold =  cv2.inRange(S, threshold, 255)
+
 
     # Region Filling 
     # fill empty regions if hand mask
@@ -589,6 +670,15 @@ def preprocessing_yasmine(img, debug=False,path=""):
 
     # resize region filled mask to be compatable with original image size
     region_filling = region_filling[0:img_gray.shape[0], 0:img_gray.shape[1]]
+
+
+    ycrcb=YCrCb(img)
+    img_flip=remove_shadow_Ycrcb(img)
+    show_images([cv2.cvtColor(img, cv2.COLOR_BGR2RGB),s_threshold,ycrcb],['Original','s_threshold'])
+
+
+    return None
+
 
     # and the hand mask with the gray image
     img_anded = cv2.bitwise_and(img_gray, region_filling)
