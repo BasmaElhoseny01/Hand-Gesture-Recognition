@@ -64,28 +64,30 @@ def preprocessing(images,option, debug=False):
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)]=np.append(hands[str(i)],s_channel,axis=0)
             elif(option=="yasmine"):
-                s_channel_mask=preprocessing_yasmine(img)
-                if(hands[str(i)] is None):
-                    hands[str(i)]=np.array([s_channel_mask]) #1* 128*256
-                else:
-                    # print('hands[str(i)]',np.shape(hands[str(i)]))
-                    s_channel_mask=np.atleast_3d(s_channel_mask)#128*286*1 
-                    s_channel_mask=np.moveaxis(s_channel_mask,[2],[0])#-> swap axes to be 1*128*286  2<->0
-                    # print('img_hand',np.shape(img_hand))
-                    hands[str(i)]=np.append(hands[str(i)],s_channel_mask,axis=0)
+                print(str(i))
+                # s_channel_mask=preprocessing_yasmine(img)
+                # if(hands[str(i)] is None):
+                #     hands[str(i)]=np.array([s_channel_mask]) #1* 128*256
+                # else:
+                #     # print('hands[str(i)]',np.shape(hands[str(i)]))
+                #     s_channel_mask=np.atleast_3d(s_channel_mask)#128*286*1 
+                #     s_channel_mask=np.moveaxis(s_channel_mask,[2],[0])#-> swap axes to be 1*128*286  2<->0
+                #     # print('img_hand',np.shape(img_hand))
+                #     hands[str(i)]=np.append(hands[str(i)],s_channel_mask,axis=0)
+                images[str(i)][index] = preprocessing_yasmine(img)
             else:
                 print("Wrong Preprocessing Option!!!",option)
                 raise TypeError("Wrong Preprocessing Option")
             index+=1
 
-        images[str(i)]=None #Deallocate for Memory
+        # images[str(i)]=None #Deallocate for Memory
 
     if(option=="1"):
         OCR=None
         classification=None
     elif(option=="2"):
         images=None
-    elif(option=="3" or option=="4" or option=="5" or option=="6" or option=="yasmine"):
+    elif(option=="3" or option=="4" or option=="5" or option=="6"):
         images=hands
 
     return OCR,classification,images
@@ -135,6 +137,13 @@ def equalizeS(img, debug=False):
     
     return img_eq
 
+def equalizeV(img_hsv, debug=False):
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    H, S, V = cv2.split(img_hsv)
+    v_equalized = clahe.apply(V)
+    h_new = cv2.subtract(H, H)
+    equalized = cv2.merge([h_new, S, v_equalized])
+    return equalized
 
 #######################################################################################################
 # Doesn't need feature extraction
@@ -282,46 +291,87 @@ def sChannelPreprocessing(img,debug=False):
 ################################################################################
 
 def preprocessing_yasmine(img, debug=False):
-    
+
     # convert image from BGR to HSV and GRAYSCALE
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # equalize v channel hsv 
+    # img_hsv_equalized = equalizeV(img_hsv)
 
     # extract the S channel from HSV
-    S = img_hsv[:,:,1]
+    s_channel = img_hsv[:,:,1]
+
+    # extract the V channel from HSV
+    v_channel = img_hsv[:,:,2]
 
     # get threshold for each image seperately
-    threshold = getThreshold(S)
+    s_threshold = getThreshold(s_channel)
+
+    # get threshold for each image seperately
+    v_threshold = getThreshold(v_channel)
+
+    # apply threshhold on image
+    s_thresholded =  cv2.inRange(s_channel, s_threshold, 255)
     
     # apply threshhold on image
-    s_threshold =  cv2.inRange(S, threshold, 255)
+    v_thresholded =  cv2.inRange(v_channel, v_threshold, 255)
+
+    # hsv_thresholded = cv2.inRange(img_hsv, (0,s_threshold, v_threshold), (0, 255, 255))
 
     # Region Filling 
     # fill empty regions if hand mask
-    img_fill=s_threshold.copy()
-    h,w=s_threshold.shape[:2]
-    mask=np.zeros((h+2,w+2),np.uint8)
+    # img_fill=s_thresholded.copy()
+    # h,w=s_thresholded.shape[:2]
+    # mask=np.zeros((h+2,w+2),np.uint8)
 
-    cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
-    region_filling=cv2.bitwise_not(mask)
-    region_filling[region_filling == 255] = 255
-    region_filling[region_filling == 254] = 0
+    # cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
+    # region_filling=cv2.bitwise_not(mask)
+    # region_filling[region_filling == 255] = 255
+    # region_filling[region_filling == 254] = 0
 
-    # resize region filled mask to be compatable with original image size
-    region_filling = region_filling[0:img_gray.shape[0], 0:img_gray.shape[1]]
+    # # resize region filled mask to be compatable with original image size
+    # region_filling = region_filling[0:img_gray.shape[0], 0:img_gray.shape[1]]
 
     # and the hand mask with the gray image
-    img_anded = cv2.bitwise_and(img_gray, region_filling)
-    # img_anded = cv2.cvtColor(img_anded, cv2.COLOR_GRAY2BGR)
+    # img = np.asarray(img)
+    # b_channel = img[:,:,0]
+    # region_filling = np.asarray(region_filling)
 
+    # img_anded = cv2.bitwise_and(img, img, mask=region_filling)
+    s_and_v = cv2.bitwise_and(s_thresholded, v_thresholded)
+    # v_inverted = cv2.bitwise_not(v_thresholded)
+    # s_and_vinv = cv2.bitwise_and(s_thresholded, v_inverted)
+    # img_ored = cv2.bitwise_or(s_thresholded, v_thresholded)
+
+    if(np.sum(s_and_v)//255 < 0.25*s_and_v.shape[0]*s_and_v.shape[1]):
+        s_and_v = s_thresholded
+
+    # Region Filling 
+    # fill empty regions if hand mask
+    # img_fill=s_and_v.copy()
+    # h,w=s_and_v.shape[:2]
+    # mask=np.zeros((h+2,w+2),np.uint8)
+
+    # cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
+    # region_filling_anded=cv2.bitwise_not(mask)
+    # region_filling_anded[region_filling_anded == 255] = 255
+    # region_filling_anded[region_filling_anded == 254] = 0
+
+    # Erosion
+    kernel = np.ones((3, 3), np.uint8)
+    # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
+    edge_closing = cv2.morphologyEx(s_and_v, cv2.MORPH_CLOSE, kernel, iterations=2) # erode
+
+    # img_anded = cv2.bitwise_and(img, img, mask=edge_closing)
+
+    _, _, _, mask_flipped, original_fliped = flip_horizontal(img=edge_closing, Original=img)
+
+    img_anded = cv2.bitwise_and(original_fliped, original_fliped, mask=mask_flipped)
 
     if(debug):
-        print(np.max(region_filling))
-        print(np.min(region_filling))
-        print(img_gray.shape)
-        print(region_filling.shape)
-        print(threshold)
-        show_images([S, s_threshold, region_filling, img_anded],['s_channel', 'thresholded', 'filled_regions', 'image_anded'])
+        # show_images([s_channel, v_channel, s_thresholded, v_thresholded, region_filling, img_ored, s_and_vinv],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 'region_filling', 'oring', 's_and_vinv'])
+        show_images([s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, img_anded],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 's_and_v', 'closing', 'img_anded'])
  
     return img_anded
 
@@ -354,63 +404,123 @@ def RGB_Mask(img):
 
     return RGB_Rule
 
-def flip_horizontal(img,debug=False):
+# def flip_horizontal(img,debug=False):
+#     '''
+#     img:Binary image
+#     Adjust Orientation of the hand Horizontally
+#     '''
+
+#     #Compute OCR
+#     OCR = np.sum(img,axis=0)
+
+
+#     #Get Max index
+#     res=list(compress(range(len(OCR==np.max(OCR))),OCR==np.max(OCR)))
+#     max_x_ind=res[0]
+
+#     #Get Min index
+#     result = min(enumerate(OCR), key=lambda x: x[1] if x[1] > 20 else float('inf'))  #CHECK: Handle inf case
+#     # print("Position : {}, Value : {}".format(*result))
+#     min_x_ind=result[0]
+
+
+#     if(min_x_ind>max_x_ind):
+#         img=cv2.flip(img,1) #1=horizontally
+#         max_x_ind=np.shape(img)[1]-max_x_ind
+#         min_x_ind=np.shape(img)[1]-min_x_ind 
+#         OCR=np.flip(OCR)
+      
+
+
+#     if(debug):
+#         print("Image Size",np.shape(img))
+#         print("OCR shape",np.shape(OCR))
+#         print("Max x is at",max_x_ind)
+#         print("Min x is at",min_x_ind)
+
+#         # x-coordinates of left sides of bars 
+#         left = range(0,np.shape(OCR)[0])
+#         print("X Range",left)
+        
+#         # heights of bars
+#         height = OCR
+#         print("Heights",height)
+
+#         # plotting a bar chart
+#         plt.bar(left, height,
+#                 width = 0.1, color = ['red', 'green'])
+        
+#         # naming the x-axis
+#         plt.xlabel('x - axis')
+#         # naming the y-axis
+#         plt.ylabel('y - axis')
+#         # plot title
+#         plt.title('My bar chart!')
+        
+#         # function to show the plot
+#         plt.show()
+#         show_images([img],['Flipped'])
+
+def flip_horizontal(img, debug=False, Original=None):
     '''
     img:Binary image
     Adjust Orientation of the hand Horizontally
     '''
 
-    #Compute OCR
-    OCR = np.sum(img,axis=0)
+    # Compute OCR
+    OCR = np.sum(img, axis=0)
 
+    # Get Max index
+    res = list(compress(range(len(OCR == np.max(OCR))), OCR == np.max(OCR)))
+    max_x_ind = res[0]
 
-    #Get Max index
-    res=list(compress(range(len(OCR==np.max(OCR))),OCR==np.max(OCR)))
-    max_x_ind=res[0]
-
-    #Get Min index
-    result = min(enumerate(OCR), key=lambda x: x[1] if x[1] > 20 else float('inf'))  #CHECK: Handle inf case
+    # Get Min index
+    # CHECK: Handle inf case
+    result = min(enumerate(OCR),
+                 key=lambda x: x[1] if x[1] > 20 else float('inf'))
     # print("Position : {}, Value : {}".format(*result))
-    min_x_ind=result[0]
+    min_x_ind = result[0]
 
+    if (min_x_ind > max_x_ind):
+        img = cv2.flip(img, 1)  # 1=horizontally
+        max_x_ind = np.shape(img)[1]-max_x_ind
+        min_x_ind = np.shape(img)[1]-min_x_ind
+        OCR = np.flip(OCR)
+        if (Original is not None):
+            Original_fliped = cv2.flip(Original, 1)
+    else:
+        Original_fliped = Original
 
-    if(min_x_ind>max_x_ind):
-        img=cv2.flip(img,1) #1=horizontally
-        max_x_ind=np.shape(img)[1]-max_x_ind
-        min_x_ind=np.shape(img)[1]-min_x_ind 
-        OCR=np.flip(OCR)
-      
+    if (debug):
+        print("Image Size", np.shape(img))
+        print("OCR shape", np.shape(OCR))
+        print("Max x is at", max_x_ind)
+        print("Min x is at", min_x_ind)
 
+        # x-coordinates of left sides of bars
+        left = range(0, np.shape(OCR)[0])
+        print("X Range", left)
 
-    if(debug):
-        print("Image Size",np.shape(img))
-        print("OCR shape",np.shape(OCR))
-        print("Max x is at",max_x_ind)
-        print("Min x is at",min_x_ind)
-
-        # x-coordinates of left sides of bars 
-        left = range(0,np.shape(OCR)[0])
-        print("X Range",left)
-        
         # heights of bars
         height = OCR
-        print("Heights",height)
+        print("Heights", height)
 
         # plotting a bar chart
         plt.bar(left, height,
-                width = 0.1, color = ['red', 'green'])
-        
+                width=0.1, color=['red', 'green'])
+
         # naming the x-axis
         plt.xlabel('x - axis')
         # naming the y-axis
         plt.ylabel('y - axis')
         # plot title
         plt.title('My bar chart!')
-        
+
         # function to show the plot
         plt.show()
-        show_images([img],['Flipped'])
+        show_images([img], ['Flipped'])
 
+    return OCR, max_x_ind, min_x_ind, img, Original_fliped
 
     return OCR,max_x_ind,min_x_ind,img
 
