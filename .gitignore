@@ -11,3 +11,5 @@ data_split_resize/
 old_preprocessing/
 preprocessing_results/
 old_preprocessing/
+src/scripts/general_resize/input/
+src/scripts/general_resize/output/

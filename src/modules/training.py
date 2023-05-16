@@ -4,7 +4,6 @@ def train_model(X_train,Y_train,option):
     clf=None
     if(option=="svm"):
         # Create an SVM classifier with a linear kernel
-        # clf = svm.SVC(kernel='rbf', C=1, degree=3)
         clf = svm.SVC(kernel='rbf', C=10, degree=3)
         # Fit the classifier to the training data
         clf.fit(X_train, Y_train)
