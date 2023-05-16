@@ -561,7 +561,7 @@ def sChannelPreprocessing(img,debug=False):
  
     return S
 
-def preprocessing_yasmine(img, debug=False):
+def preprocessing_yasmine(img, debug=False,path=""):
     
     # convert image from BGR to HSV and GRAYSCALE
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -601,6 +601,6 @@ def preprocessing_yasmine(img, debug=False):
         print(img_gray.shape)
         print(region_filling.shape)
         print(threshold)
-        show_images([S, s_threshold, region_filling, img_anded],['s_channel', 'thresholded', 'filled_regions', 'image_anded'])
+        show_images([S, s_threshold, region_filling, img_anded],['s_channel', 'thresholded', 'filled_regions', 'image_anded'],save=True, path_save=path)
  
     return img_anded
