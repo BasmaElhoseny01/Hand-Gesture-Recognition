@@ -73,9 +73,7 @@ class ThreadWithReturnValue(Thread):
         return self._return
     
 def main(argv):
-    preprocessing_option = argv[0]
-    feature_extractor_option = argv[1]
-    model_option = argv[2]
+
 
     final_results = []
     time_vector = []
@@ -121,25 +119,21 @@ def main(argv):
             # Create 3 Threads
             # Start a new thread to Receive messages
 
-            # th1= ThreadWithReturnValue(target=ocr_thread, args=(img, ocr_svm_model, False))
-            th2= ThreadWithReturnValue(target=ocr_thread, args=(img, ocr_rf_model, False))
+            th1= ThreadWithReturnValue(target=ocr_thread, args=(img, ocr_svm_model, False))
             th3= ThreadWithReturnValue(target=mask_thread, args=(img, rf_model, False))
             th4= ThreadWithReturnValue(target=mask_thread, args=(img, svm_model, False))
 
-            # th1.start()
-            th2.start()
+            th1.start()
             th3.start()
             th4.start()
 
 
-            # v1=th1.join()
-            v2=th2.join()
+            v1=th1.join()
             v3=th3.join()
             v4=th4.join()
             
 
-            # fre_array[v1]+=1
-            fre_array[v2]+=1
+            fre_array[v1]+=1
             fre_array[v3]+=1
             fre_array[v4]+=1
 
@@ -150,7 +144,7 @@ def main(argv):
                 result=np.argmax(fre_array)
             end=time.time()
 
-            print(v2,v3,v4,result)
+            print(v1,v3,v4,result)
 
             final_results.append(result)
             time_vector.append(end-start)
