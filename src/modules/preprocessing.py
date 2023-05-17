@@ -259,8 +259,7 @@ def preprocessing_yasmine_mask_ginger(img, debug=False, save=False,path=""):
 def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
 
     # Shadow removal
-    shadow_mask = calculate_shadow_mask(
-        org_image=img, ab_threshold=0, region_adjustment_kernel_size=10)
+    shadow_mask = calculate_shadow_mask(org_image=img, ab_threshold=0, region_adjustment_kernel_size=10)
     shadow_removed = img
     shadow_removed[shadow_mask == 255] = 0
 
@@ -268,11 +267,12 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    _, gray_threshold = cv2.threshold(
-        img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    _, gray_threshold = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
     # equalize v channel hsv
-    # img_hsv_equalized = equalizeV(img_hsv)
+    img_hsv_equalized = equalizeV(img_hsv)
+
+    img_hsv = img_hsv_equalized
 
     # extract the S channel from HSV
     s_channel = img_hsv[:, :, 1]
@@ -319,10 +319,32 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
     # Closing
     kernel = np.ones((3, 3), np.uint8)
     edge_closing = cv2.morphologyEx(
-        s_and_v, cv2.MORPH_CLOSE, kernel, iterations=2)
+        s_and_v, cv2.MORPH_CLOSE, kernel, iterations=1)
+    
+    # Add padding
+    edge_closing=np.pad(edge_closing,pad_width=50,mode='constant',constant_values=0)
 
+    # Region Filling
+    # fill empty regions if hand mask
+    if(debug):
+        img_fill=edge_closing.copy()
+    else:
+        img_fill = edge_closing
+    h,w=edge_closing.shape[:2]
+    mask=np.zeros((h+2,w+2),np.uint8)
+
+    cv2.floodFill(img_fill,mask,(0,0),255) #img_fill marks regions filled -> not so that we can see it bec they are black
+    region_filling=cv2.bitwise_not(mask)
+    region_filling[region_filling == 255] = 255
+    region_filling[region_filling == 254] = 0
+
+    # resize region filled mask to be compatable with original image size
+    region_filling = region_filling[0:edge_closing.shape[0], 0:edge_closing.shape[1]]
+
+    # remove padding
+    region_filling = region_filling[50:region_filling.shape[0]-50, 50:region_filling.shape[1]-50]
     _, _, _, mask_flipped, original_fliped = flip_horizontal(
-        img=edge_closing, Original=img)
+        img=region_filling, Original=img)
 
     # img_anded = cv2.bitwise_and(original_fliped, original_fliped, mask=mask_flipped)
 
@@ -331,8 +353,8 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
     if (debug):
         # show_images([s_channel, v_channel, s_thresholded, v_thresholded, region_filling, img_ored, s_and_vinv],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 'region_filling', 'oring', 's_and_vinv'])
         # show_images([gray_threshold, result_threshold, otsu_s_threshhold], ['gray_threshold', 'result_threshold', 'otsu_s_threshold'])
-        show_images([img, shadow_removed, s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, mask_flipped], [
-                    'original', 'shadow_Removed', 's_channel', 'v_channel', 's_thresholded', 'v_thresholded', 's_and_v', 'closing', 'mask_flipped'], save=save, path_save=path)
+        show_images([img, shadow_removed, s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, region_filling, mask_flipped], [
+                    'original', 'shadow_Removed', 's_channel', 'v_channel', 's_thresholded', 'v_thresholded', 's_and_v', 'closing', 'region_filling','mask_flipped'], save=save, path_save=path)
 
     return mask_flipped
 ##############################################################################################################################
