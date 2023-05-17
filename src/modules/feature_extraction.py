@@ -13,9 +13,8 @@ def extract_features(images,option,train,visual_words=None,clusters=10):
                 if(img.ndim==2):
                     #2D Array no channel axis add it
                     img=np.atleast_3d(img)
-                # fd, hog_image = hog(img, orientations=9, pixels_per_cell=(
-                # 16, 16), cells_per_block=(2, 2), visualize=True, channel_axis=2)
-                fd, hog_image = hog(img, orientations=16, pixels_per_cell=(16, 16), cells_per_block=(4, 4), visualize=True, channel_axis=2)
+                fd, hog_image = hog(img, orientations=16, pixels_per_cell=(
+                16, 16), cells_per_block=(4, 4), visualize=True, channel_axis=2)
                 X.append(fd)
                 Y.append(i)
             else:

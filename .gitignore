@@ -10,9 +10,6 @@ data_split/
 data_split_resize/
 old_preprocessing/
 preprocessing_results/
-input/
-output/
-models/
-*.joblib
-sara/
-original/
+old_preprocessing/
+src/scripts/general_resize/input/
+src/scripts/general_resize/output/
