@@ -25,9 +25,6 @@ def train_model(X_train,Y_train,option):
 
 
 
-
-
-    return 
 def train_randomforest(X_train,y_train,X_test,y_test):
     # Split the dataset into training and testing sets
     # X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)

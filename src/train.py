@@ -47,20 +47,26 @@ def main(argv):
     # Step(4) Train our classifier
     print('Training Model ....')
     if(model_option=="both" or model_option=="svm"):
+        start = time.time()
         svm=train_model(X_train,Y_train,option="svm")
+        end = time.time()
 
         # Step(5) Save our model
         filename = "../models/Trained_SVM.joblib"
         joblib.dump(svm, filename)
         print('SWM Model exported')
+        print('Training time = ' + str(end-start))
 
     if(model_option=="both" or model_option=="rf"):
+        start = time.time()
         rf=train_model(X_train,Y_train,option="rf")
+        end = time.time()
 
         # Step(5) Save our model
         filename = "../models/Trained_RF.joblib"
         joblib.dump(rf, filename)
-        print('RF Model exported')   
+        print('RF Model exported')
+        print('Training time = ' + str(end-start))   
     if(model_option!="both" and model_option!="rf" and model_option!="svm"):
         raise TypeError("Wrong Model Option")
 
