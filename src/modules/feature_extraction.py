@@ -1,4 +1,18 @@
 from utils import *
+
+def extract_features_img(img,option):
+    if(option=='hog'):
+        if(img.ndim==2):
+            #2D Array no channel axis add it
+            img=np.atleast_3d(img)
+        fd, hog_image = hog(img, orientations=16, pixels_per_cell=(
+        16, 16), cells_per_block=(4, 4), visualize=True, channel_axis=2)
+        return fd
+    else:
+        print("Wrong Feature Option!!!",option)
+        raise TypeError("Wrong Feature Option")
+        
+
 def extract_features(images,option,train,visual_words=None,clusters=10):
     X = []
     Y = []

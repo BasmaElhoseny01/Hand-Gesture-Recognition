@@ -2,6 +2,41 @@ from global_ import IMG_SIZE
 
 from utils import *
 
+def preprocess_img(img, option, debug=False):
+    if (option == "1"):
+        return equalizeS(img, debug)
+    elif (option == "2"):
+        # OCR
+        ocr, _ = preprocessing_OCR(img)
+        return ocr
+    elif (option == "3"):
+        _, _, img_hand = hand_shadow_based_preprocessing(img, debug)
+        return img_hand
+    elif (option == "4"):
+        _, image_finger = cut_fingers_preprocessing(img, debug)
+        return image_finger
+    elif (option == "5"):
+        img_grey = Grey_Scale_Preprocessing(img)
+        return img_grey
+    elif (option == "shadow"):
+        # BGR image :D
+        return remove_shadow_Ycrcb(img)
+    elif (option == "ycrcb"):
+        return YCrCb(img)
+    elif (option == "6"):
+        s_channel = sChannelPreprocessing(img)
+        return s_channel
+    elif (option == "yasmine"):
+        return preprocessing_yasmine(img)
+    elif (option == "yasmine1"):
+        image_mask = preprocessing_yasmine_mask(img,debug)
+        return image_mask
+    elif(option == "yasmine2"):
+        image_mask = preprocessing_yasmine_mask_ginger(img, debug)
+        return image_mask
+    else:
+        print("Wrong Preprocessing Option!!!", option)
+        raise TypeError("Wrong Preprocessing Option")
 
 def preprocessing(images, option, debug=False):
     # SIZE_OF_IMAGE:

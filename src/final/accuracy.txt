@@ -1,0 +1,4 @@
+preprocessing_option: yasmine1
+feature_extractor_option: hog
+model_option: svm
+Accuracy: 0.1111111111111111
