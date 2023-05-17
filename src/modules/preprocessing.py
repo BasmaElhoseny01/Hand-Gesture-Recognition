@@ -291,40 +291,52 @@ def sChannelPreprocessing(img,debug=False):
 
 ################################################################################
 
-def preprocessing_yasmine(img, debug=False):
+def preprocessing_yasmine(img, debug=False,path=""):
+
+    # Shadow removal
+    shadow_mask = calculate_shadow_mask(org_image=img, ab_threshold=0, region_adjustment_kernel_size=10)
+    shadow_removed = img
+    shadow_removed[shadow_mask == 255] = 0
+
+
 
     # convert image from BGR to HSV and GRAYSCALE
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    _,gray_threshold = cv2.threshold(img_gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
     # equalize v channel hsv 
     # img_hsv_equalized = equalizeV(img_hsv)
 
-    print(1)
+    # print(1)
     # extract the S channel from HSV
     s_channel = img_hsv[:,:,1]
-    print(2)
+    # print(2)
 
     # extract the V channel from HSV
     v_channel = img_hsv[:,:,2]
-    print(3)
+    # print(3)
 
     # get threshold for each image seperately
     s_threshold = getThreshold(s_channel)
-    print(4)
+    # print(4)
 
     # get threshold for each image seperately
     v_threshold = getThreshold(v_channel)
-    print(5)
+    # print(5)
 
 
     # apply threshhold on image
     s_thresholded =  cv2.inRange(s_channel, s_threshold, 255)
-    print(6)
+    # print(6)
+
+    # TRY OTSU
+    _,otsu_s_threshhold = cv2.threshold(s_channel, 0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     
     # apply threshhold on image
     v_thresholded =  cv2.inRange(v_channel, v_threshold, 255)
-    print(7)
+    # print(7)
 
     # hsv_thresholded = cv2.inRange(img_hsv, (0,s_threshold, v_threshold), (0, 255, 255))
 
@@ -349,7 +361,7 @@ def preprocessing_yasmine(img, debug=False):
 
     # img_anded = cv2.bitwise_and(img, img, mask=region_filling)
     s_and_v = cv2.bitwise_and(s_thresholded, v_thresholded)
-    print(8)
+    # print(8)
 
     # v_inverted = cv2.bitwise_not(v_thresholded)
     # s_and_vinv = cv2.bitwise_and(s_thresholded, v_inverted)
@@ -357,8 +369,8 @@ def preprocessing_yasmine(img, debug=False):
 
     if(np.sum(s_and_v)//255 < 0.25*s_and_v.shape[0]*s_and_v.shape[1]):
         s_and_v = s_thresholded
-        print(9)
-    print(10)
+        # print(9)
+    # print(10)
 
 
 
@@ -378,21 +390,25 @@ def preprocessing_yasmine(img, debug=False):
     # edge = cv2.morphologyEx(edge, cv2.MORPH_DILATE, kernel, iterations=5) #erode
     edge_closing = cv2.morphologyEx(s_and_v, cv2.MORPH_CLOSE, kernel, iterations=2) # erode
 
-    print(11)
+    # print(11)
 
 
     # img_anded = cv2.bitwise_and(img, img, mask=edge_closing)
 
     _, _, _, mask_flipped, original_fliped = flip_horizontal(img=edge_closing, Original=img)
-    print(12)
+    # print(12)
 
 
     img_anded = cv2.bitwise_and(original_fliped, original_fliped, mask=mask_flipped)
-    print(13)
+    # print(13)
+
+    _,result_threshold = cv2.threshold(cv2.cvtColor(img_anded, cv2.COLOR_BGR2GRAY),0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
 
     if(debug):
         # show_images([s_channel, v_channel, s_thresholded, v_thresholded, region_filling, img_ored, s_and_vinv],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 'region_filling', 'oring', 's_and_vinv'])
-        show_images([s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, img_anded],['s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 's_and_v', 'closing', 'img_anded'])
+        show_images([gray_threshold, result_threshold, otsu_s_threshhold], ['gray_threshold', 'result_threshold', 'otsu_s_threshold'])
+        show_images([img, shadow_removed,s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, img_anded],['original', 'shadow_Removed','s_channel', 'v_channel','s_thresholded', 'v_thresholded' , 's_and_v', 'closing', 'img_anded'],save=False,path_save=path)
  
     return img_anded
 
@@ -511,3 +527,37 @@ def shadow_remove(img):
 def cut_fingers(hand_binary,hand_center_x,raduis=150):
   image_finger = cv2.circle(hand_binary, (hand_center_x,np.shape(hand_binary)[0]//2), raduis,0, -1)
   return image_finger
+
+def calculate_shadow_mask(org_image: np.ndarray,
+                          ab_threshold: int,
+                          region_adjustment_kernel_size: int) -> np.ndarray:
+    lab_img = cv2.cvtColor(org_image, cv2.COLOR_BGR2LAB)
+
+    # Convert the L,A,B from 0 to 255 to 0 - 100 and -128 - 127 and -128 - 127 respectively
+    l_range = (0, 100)
+    ab_range = (-128, 127)
+
+    lab_img = lab_img.astype('int16')
+    lab_img[:, :, 0] = lab_img[:, :, 0] * l_range[1] / 255
+    lab_img[:, :, 1] += ab_range[0]
+    lab_img[:, :, 2] += ab_range[0]
+
+    # Calculate the mean values of L, A and B across all pixels
+    means = [np.mean(lab_img[:, :, i]) for i in range(3)]
+    thresholds = [means[i] - (np.std(lab_img[:, :, i]) / 3) for i in range(3)]
+
+    # Apply threshold using only L
+    if sum(means[1:]) <= ab_threshold:
+        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
+                           (thresholds[0], ab_range[1], ab_range[1]))
+    else:  # Else, also consider B channel
+        mask = cv2.inRange(lab_img, (l_range[0], ab_range[0], ab_range[0]),
+                           (thresholds[0], ab_range[1], thresholds[2]))
+
+    kernel_size = (region_adjustment_kernel_size,
+                   region_adjustment_kernel_size)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, kernel_size)
+    cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, mask)
+    cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, mask)
+
+    return mask
