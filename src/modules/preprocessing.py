@@ -152,7 +152,7 @@ def preprocessing(images, option, debug=False):
         classification = None
     elif (option == "2"):
         images = None
-    elif (option == "3" or option == "4" or option == "5" or option == "6" or option == "yasmine1" or  option == "yasmine2"):
+    elif (option == "3" or option == "4" or option == "5" or option == "6" or option == "mask" or  option == "yasmine2"):
         images = hands
 
     return OCR, classification, images
