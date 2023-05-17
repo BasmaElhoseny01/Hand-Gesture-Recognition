@@ -9,7 +9,7 @@ def extract_features(images,option,train,visual_words=None,clusters=10):
     for i in range(6):
         print(i)
         for img in images[str(i)]:
-            print(np.shape(img))
+            # print(np.shape(img))
             if(option=="hog"):
                 if(img.ndim==2):
                     #2D Array no channel axis add it
