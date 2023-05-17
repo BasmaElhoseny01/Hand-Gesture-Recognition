@@ -13,3 +13,5 @@ preprocessing_results/
 old_preprocessing/
 src/scripts/general_resize/input/
 src/scripts/general_resize/output/
+models/Trained_RF.joblib
+models/Trained_SVM.joblib

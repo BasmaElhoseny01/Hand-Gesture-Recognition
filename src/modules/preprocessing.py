@@ -74,15 +74,7 @@ def preprocessing(images, option, debug=False):
                     # print('img_hand',np.shape(img_hand))
                     hands[str(i)]=np.append(hands[str(i)],s_channel,axis=0)
             elif(option=="yasmine"):
-                s_channel_mask=preprocessing_yasmine(img)
-                if(hands[str(i)] is None):
-                    hands[str(i)]=np.array([s_channel_mask]) #1* 128*256
-                else:
-                    # print('hands[str(i)]',np.shape(hands[str(i)]))
-                    s_channel_mask=np.atleast_3d(s_channel_mask)#128*286*1 
-                    s_channel_mask=np.moveaxis(s_channel_mask,[2],[0])#-> swap axes to be 1*128*286  2<->0
-                    # print('img_hand',np.shape(img_hand))
-                    hands[str(i)]=np.append(hands[str(i)],s_channel_mask,axis=0)
+                 images[str(i)][index]=preprocessing_yasmine(img)
             else:
                 print("Wrong Preprocessing Option!!!", option)
                 raise TypeError("Wrong Preprocessing Option")
