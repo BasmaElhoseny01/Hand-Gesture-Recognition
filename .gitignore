@@ -17,3 +17,4 @@ models/Trained_RF.joblib
 models/Trained_SVM.joblib
 *.joblib
 *.joblib
+kamal data/
