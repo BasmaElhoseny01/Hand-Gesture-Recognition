@@ -93,7 +93,7 @@ def main(argv):
 
             if currentArgument in ("-t", "--split"):
                 print("Splitting Simple Data Set")
-                split_data_simple(values[0])
+                split_data_simple(int(values[0]))
                 return
 
             # if currentArgument in ("-i", "--large"):
