@@ -10,10 +10,10 @@ sys.path.insert(1, src_dir) # back to the src directory
 from utils import *
 from modules.preprocessing import preprocessing_yasmine,preprocessing_yasmine_mask,preprocessing_yasmine_mask_ginger
 
-count_indx=5
+count_indx=50
 
 for j in ['train']:
-    for i in range(0, 6):
+    for i in range(2, 6):
         # print(i)
         path=os.path.join(src_dir,'../data_split_resize/men/'+j+'/'+str(i)+'/')
         print(path)
