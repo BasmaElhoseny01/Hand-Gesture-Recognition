@@ -23,7 +23,6 @@ def main(argv):
     print("Preprocessing ...")
     OCR,classification,train_images = preprocessing(train_images,option=preprocessing_option)
     print('Preprocessing Done')
-    print(np.shape(train_images['0']))
 
 
 

@@ -100,19 +100,9 @@ def main(argv):
 
     print("Models Loaded Successfully :D")
 
-    # if(model_option=="svm"):
-    #     filename = "./Trained_SVM.joblib"
-    # elif(model_option=="rf"):
-    #     filename = "./Trained_RF.joblib"
-    # else:
-    #     print("Wrong Model Option!!!",model_option)
-    #     raise TypeError("Wrong Feature Option")
-    # model = joblib.load(filename)
-    # if(model is None):
-    #     print('Model is None')
-
     path_data_folder = './data'
     for filename in os.listdir(path_data_folder):
+        print(filename)
         fre_array=np.zeros((6,1))
         try:
             # Get path
