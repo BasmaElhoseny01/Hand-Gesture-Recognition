@@ -7,8 +7,8 @@ def preprocess_img(img, option, debug=False):
         return equalizeS(img, debug)
     elif (option == "2"):
         # OCR
-        ocr, _ = preprocessing_OCR(img)
-        return ocr
+        ocr, img = preprocessing_OCR(img)
+        return ocr,img
     elif (option == "3"):
         _, _, img_hand = hand_shadow_based_preprocessing(img, debug)
         return img_hand
@@ -17,23 +17,23 @@ def preprocess_img(img, option, debug=False):
         return image_finger
     elif (option == "5"):
         img_grey = Grey_Scale_Preprocessing(img)
-        return img_grey
+        return None,img_grey
     elif (option == "shadow"):
         # BGR image :D
         return remove_shadow_Ycrcb(img)
     elif (option == "ycrcb"):
-        return YCrCb(img)
+        return None,YCrCb(img)
     elif (option == "6"):
         s_channel = sChannelPreprocessing(img)
-        return s_channel
+        return None,s_channel
     elif (option == "yasmine"):
-        return preprocessing_yasmine(img)
-    elif (option == "mask"):
-        image_mask = preprocessing_yasmine_mask(img,debug)
-        return image_mask
+        preprocessing_yasmine(img)
+    elif (option == "yasmine1"):
+        ocr,image_mask = preprocessing_yasmine_mask(img,debug)
+        return ocr,image_mask
     elif(option == "yasmine2"):
         image_mask = preprocessing_yasmine_mask_ginger(img, debug)
-        return image_mask
+        return None,image_mask
     else:
         print("Wrong Preprocessing Option!!!", option)
         raise TypeError("Wrong Preprocessing Option")
@@ -55,7 +55,8 @@ def preprocessing(images, option, debug=False):
                 images[str(i)][index] = equalizeS(img, debug)
             elif (option == "2"):
                 # OCR
-                ocr, _ = preprocessing_OCR(img)
+                # ocr, _ = preprocessing_OCR(img)
+                ocr,_=preprocessing_yasmine_mask(img)
                 OCR = np.vstack([OCR, ocr])
                 classification.append(i)
             elif (option == "3"):
@@ -111,8 +112,8 @@ def preprocessing(images, option, debug=False):
                     hands[str(i)] = np.append(hands[str(i)], s_channel, axis=0)
             elif (option == "yasmine"):
                 images[str(i)][index] = preprocessing_yasmine(img)
-            elif (option == "mask"):
-                image_mask = preprocessing_yasmine_mask(img,debug)
+            elif (option == "yasmine1"):
+                _,image_mask = preprocessing_yasmine_mask(img,debug)
                 if (hands[str(i)] is None):
                     hands[str(i)] = np.array([image_mask])  # 1* 128*256
                 else:
@@ -343,7 +344,7 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
 
     # remove padding
     region_filling = region_filling[50:region_filling.shape[0]-50, 50:region_filling.shape[1]-50]
-    _, _, _, mask_flipped, original_fliped = flip_horizontal(
+    OCR, _, _, mask_flipped, original_fliped = flip_horizontal(
         img=region_filling, Original=img)
 
     # img_anded = cv2.bitwise_and(original_fliped, original_fliped, mask=mask_flipped)
@@ -356,7 +357,7 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
         show_images([img, shadow_removed, s_channel, v_channel, s_thresholded, v_thresholded, s_and_v, edge_closing, region_filling, mask_flipped], [
                     'original', 'shadow_Removed', 's_channel', 'v_channel', 's_thresholded', 'v_thresholded', 's_and_v', 'closing', 'region_filling','mask_flipped'], save=save, path_save=path)
 
-    return mask_flipped
+    return OCR,mask_flipped
 ##############################################################################################################################
 
 

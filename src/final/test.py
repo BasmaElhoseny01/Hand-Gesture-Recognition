@@ -52,7 +52,7 @@ def main(argv):
 
             #Step-1 Preprocessing
             img = preprocess_img(img, preprocessing_option, debug=False)
-
+    
             #Step-2 Extract features
             fv = extract_features_img(img,feature_extractor_option)
 

@@ -1,6 +1,8 @@
 from utils import *
 
 def extract_features_img(img,option):
+    if(option=="OCR"):  #IF OCR ALready OCR is Done
+        return img #this is the ocr not the image it self
     if(option=='hog'):
         if(img.ndim==2):
             #2D Array no channel axis add it
