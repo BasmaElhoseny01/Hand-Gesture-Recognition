@@ -337,6 +337,7 @@ def preprocessing_yasmine_mask(img, debug=False, save=False,path=""):
     region_filling=cv2.bitwise_not(mask)
     region_filling[region_filling == 255] = 255
     region_filling[region_filling == 254] = 0
+    
 
     # resize region filled mask to be compatable with original image size
     region_filling = region_filling[0:edge_closing.shape[0], 0:edge_closing.shape[1]]
