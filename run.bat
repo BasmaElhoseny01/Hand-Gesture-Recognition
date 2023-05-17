@@ -9,9 +9,9 @@ cd ..
 
 
 ::Remove Old Models
-cd ./models
-del *.joblib
-cd ..
+@REM cd ./models
+@REM del *.joblib
+@REM cd ..
 
 :: Run Train - Test -Evaluate
 cd ./src

@@ -1,4 +1,3 @@
-
 import sys
 import os
 # caution: path[0] is reserved for script path (or '' in REPL)
@@ -9,17 +8,22 @@ sys.path.insert(1, src_dir) # back to the src directory
 
 # All files in src are now seen here
 from utils import *
-from modules.preprocessing import preprocessing_basma, yarab
+from modules.preprocessing import preprocessing_yasmine,preprocessing_yasmine_mask,preprocessing_yasmine_mask_ginger
 
+count_indx=50
 
-for j in ['test','val','train']:
-    for i in range(0, 6):
+for j in ['train']:
+    for i in range(2, 6):
         # print(i)
         path=os.path.join(src_dir,'../data_split_resize/men/'+j+'/'+str(i)+'/')
         print(path)
         indx=0
         for filename in os.listdir(path):
+            if(indx>=count_indx):
+                continue
             print(filename)
+            indx+=1
+
             img = cv2.imread(path+str(filename))
             if img is None:
                 continue
@@ -27,7 +31,28 @@ for j in ['test','val','train']:
             #Preprocessing
             # result=preprocessing_basma(img,debug=True)
             # Path is to sav e the results from show_images
-            yarab(img,debug=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
+            # yarab(img,debug=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
+            preprocessing_yasmine_mask(img, debug=True,save=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
+            #Save Results
+            # cv2.imwrite(os.path.join(path_result,str(filename)),result)
 
+
+        path=os.path.join(src_dir,'../data_split_resize/women/'+j+'/'+str(i)+'/')
+        print(path)
+        indx=0
+        for filename in os.listdir(path):
+            if(indx>=count_indx):
+                continue
+            print(filename)
+            indx+=1
+            img = cv2.imread(path+str(filename))
+            if img is None:
+                continue
+
+            #Preprocessing
+            # result=preprocessing_basma(img,debug=True)
+            # Path is to sav e the results from show_images
+            # yarab(img,debug=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
+            preprocessing_yasmine_mask(img, debug=True,save=True,path=os.path.join(src_dir,'../preprocessing_results/'+filename))
             #Save Results
             # cv2.imwrite(os.path.join(path_result,str(filename)),result)

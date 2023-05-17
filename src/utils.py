@@ -21,6 +21,7 @@ import shutil
 import os
 import joblib
 import sys
+import time
 
 def test_import():
     print("Hello From utils")
@@ -91,22 +92,21 @@ def read_images_test(path_data_folder, type="train"):
     """
     # Read Images in A dictionary
     images_men = images_Dictionary(path_data_folder+"men/"+type)
-    print("images_men",images_men)
+    # print(np.shape(images_men['0']))
 
     # Add Women Images
-    images_women = images_Dictionary(path_data_folder+"women/"+type)
-    print("images_women",images_women)
-
+    # images_women = images_Dictionary(path_data_folder+"women/"+type)
     # print(images_women)
     # print(np.shape(images_women['0']))
     images = {'0': None, '1': None, '2': None,
               '3': None, '4': None, '5': None}
 
-    for i in range(0, 6):
-        print(i)
-        images[str(i)] = np.concatenate(
-            (images_men[str(i)], images_women[str(i)]), axis=0)
+    # for i in range(0, 6):
+    #     print(i)
+    #     images[str(i)] = np.concatenate(
+    #         (images_men[str(i)], images_women[str(i)]), axis=0)
     # Solution_01:Concatinate part by part, and delete each concatinated part
+    images = images_men
 
     return images
 
@@ -116,6 +116,7 @@ def read_images_train(path_data_folder, debug=False):
     """
     # Read Images in A dictionary
     images_men = images_Dictionary(path_data_folder+"men/train/", debug=debug)
+    # print(np.shape(images_men['0']))
 
     # Add Women Images
     images_women = images_Dictionary(
@@ -154,7 +155,6 @@ def images_Dictionary(path_data_folder, debug=False):
     images = {
     }  # {'0':[[img1][img2]],'1':[[img1],[img2]...],'5':[[img1][img2]]}
     for filename in os.listdir(path_data_folder):
-        # print(filename)
         # Each Subfolder
 
         path = path_data_folder + "/" + filename
@@ -167,8 +167,6 @@ def images_Dictionary(path_data_folder, debug=False):
                 if (debug):
                     show_images([img])
                 category_imgs.append(img)
-
-            print("shape",np.shape(img))
         if (images.get(filename) is None):
             images.update({filename: category_imgs})
         else:
@@ -235,15 +233,6 @@ def draw_keypoints(img, keypoints, color=(255), radius=8, thickness=-1):
 
     return img
 
-def getSegmentedImage(image, threshold):
-    """
-        Documentation
-    """
-    segmented_image = np.copy(image)
-    segmented_image[segmented_image <= threshold] = 0
-    segmented_image[segmented_image > threshold] = 255
-    return segmented_image
-
 def getGraylevelCounts(image):
     """
         Documentation
@@ -261,10 +250,20 @@ def getGraylevelCounts(image):
 
     return counts,graylevels
 
+def getSegmentedImage(image, threshold):
+    """
+        Documentation
+    """
+    segmented_image = np.copy(image)
+    segmented_image[segmented_image <= threshold] = 0
+    segmented_image[segmented_image > threshold] = 255
+    return segmented_image
+
 def getThreshold(image):
     """
         Documentation
     """
+    counter = 0
     image = image.astype(np.uint8)
     counts,bins = getGraylevelCounts(image)
     cumulativecount = np.cumsum(counts)
@@ -273,11 +272,21 @@ def getThreshold(image):
     threshold = round(np.sum(np.multiply(counts,bins)/cumulativecount[-1]))
 
     while(threshold != t_old):
+        if(counter > 256):
+            break
+        counter +=1
         t_old = threshold
         low = list(range(0,t_old))
         high = list(range(t_old+1, 256))
-        t_low = round(np.sum(np.multiply(counts[0:t_old], low))/cumulativecount[t_old-1])
-        t_high = round(np.sum(np.multiply(counts[t_old+1:256],high))/(cumulativecount[-1]-cumulativecount[t_old+1]))
-        threshold = round((t_low + t_high)/2)
-
+        t_low = np.sum(np.multiply(counts[0:t_old], low))//cumulativecount[t_old-1]
+        t_high = np.sum(np.multiply(counts[t_old+1:256],high))//(cumulativecount[-1]-cumulativecount[t_old+1])
+        threshold = round((t_low + t_high)//2)
+        # print("old threshold",str(t_old)) 
+        # print("new threshold",str(threshold)) 
     return threshold
+
+def gammaCorrection(src,gamma):
+    invGamma=1/gamma
+    table=[((i/255)**invGamma)*255 for i in range(256)]
+    table=np.array(table,np.uint8)
+    return cv2.LUT(src,table)
