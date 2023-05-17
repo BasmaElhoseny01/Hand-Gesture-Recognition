@@ -1,5 +1,0 @@
-preprocessing_option: 2
-feature_extractor_option: OCR
-model_option: both
-RF: 0.6205128205128205
-SVM: 0.5333333333333333
