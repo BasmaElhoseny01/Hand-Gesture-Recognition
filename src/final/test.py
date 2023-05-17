@@ -82,7 +82,7 @@ def main(argv):
 
     # Step-0 Load models
     print('Loading Model OCR_SVM ....')
-    filename = "./Trained_OCR_SVM.joblib"
+    filename = "./Trained_OCR_RF.joblib"
     ocr_svm_model = joblib.load(filename)
 
 
@@ -101,7 +101,9 @@ def main(argv):
     print("Models Loaded Successfully :D")
 
     path_data_folder = './data'
-    for filename in os.listdir(path_data_folder):
+    files = os.listdir(path_data_folder)
+    files = sorted(files, key=lambda x: int(x.split('.')[0]))
+    for filename in files:
         print(filename)
         fre_array=np.zeros((6,1))
         try:
