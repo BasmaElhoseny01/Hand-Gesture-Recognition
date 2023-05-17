@@ -96,7 +96,7 @@ def preprocessing(images, option, debug=False):
         classification = None
     elif (option == "2"):
         images = None
-    elif (option == "3" or option == "4" or option == "5" or option == "6"):
+    elif (option == "3" or option == "4" or option == "5" or option == "6" or option=="yasmine"):
         images = hands
 
     return OCR, classification, images
@@ -224,7 +224,7 @@ def equalizeS(img, debug=False):
     # skinMask=flipped_img
 
     # Extracting skin from the threshold mask
-    img_eq = cv2.cvtColor(skin, cv2.COLOR_HSV2BGR)  # Extracted Colored Hand
+    img_eq = cv2.cvtColor(skinMask, cv2.COLOR_HSV2BGR)  # Extracted Colored Hand
 
     return img_eq
 
