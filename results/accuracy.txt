@@ -1,0 +1,4 @@
+preprocessing_option: 0
+feature_extractor_option: hog
+model_option: rf
+RF: 0.7627118644067796
