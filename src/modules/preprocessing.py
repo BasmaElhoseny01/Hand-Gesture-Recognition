@@ -28,7 +28,7 @@ def preprocess_img(img, option, debug=False):
         return s_channel
     elif (option == "yasmine"):
         return preprocessing_yasmine(img)
-    elif (option == "yasmine1"):
+    elif (option == "mask"):
         image_mask = preprocessing_yasmine_mask(img,debug)
         return image_mask
     elif(option == "yasmine2"):
@@ -111,7 +111,7 @@ def preprocessing(images, option, debug=False):
                     hands[str(i)] = np.append(hands[str(i)], s_channel, axis=0)
             elif (option == "yasmine"):
                 images[str(i)][index] = preprocessing_yasmine(img)
-            elif (option == "yasmine1"):
+            elif (option == "mask"):
                 image_mask = preprocessing_yasmine_mask(img,debug)
                 if (hands[str(i)] is None):
                     hands[str(i)] = np.array([image_mask])  # 1* 128*256
@@ -149,7 +149,7 @@ def preprocessing(images, option, debug=False):
         classification = None
     elif (option == "2"):
         images = None
-    elif (option == "3" or option == "4" or option == "5" or option == "6" or option == "yasmine1" or  option == "yasmine2"):
+    elif (option == "3" or option == "4" or option == "5" or option == "6" or option == "mask" or  option == "yasmine2"):
         images = hands
 
     return OCR, classification, images

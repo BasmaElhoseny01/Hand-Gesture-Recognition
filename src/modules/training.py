@@ -11,7 +11,7 @@ def train_model(X_train,Y_train,option):
 
     elif(option=="rf"):
         # Create a Random Forest classifier with 100 trees
-        clf= RandomForestClassifier(n_estimators=100, random_state=42, criterion='log_loss')
+        clf= RandomForestClassifier(n_estimators=380,min_impurity_decrease=0.0009,max_features ='sqrt', random_state=14, criterion='gini')
 
         # Fit the classifier to the training data
         clf.fit(X_train, Y_train)

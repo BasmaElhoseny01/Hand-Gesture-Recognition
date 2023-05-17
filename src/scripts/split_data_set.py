@@ -49,7 +49,7 @@ def split_data_simple(seed=42):
         shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
         os.makedirs(output_folder)
     splitfolders.ratio(input_folder, output=output_folder,
-                    seed=seed, ratio=(.7, .1, .2), group_prefix=None)
+                    seed=seed, ratio=(.9, .0, .1), group_prefix=None)
     #                           (train, val, test)
 
     input_folder = os.path.join(current_dir,'../../data_resize/women/')
@@ -60,7 +60,7 @@ def split_data_simple(seed=42):
         shutil.rmtree(output_folder, ignore_errors=False, onerror=None)
         os.makedirs(output_folder)
     splitfolders.ratio(input_folder, output=output_folder,
-                    seed=seed, ratio=(.7, .1, .2), group_prefix=None)
+                    seed=seed, ratio=(.9, .0, .1), group_prefix=None)
     #                           (train, val, test)
     return None
 
