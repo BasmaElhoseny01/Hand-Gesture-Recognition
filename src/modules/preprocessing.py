@@ -7,8 +7,10 @@ def preprocess_img(img, option, debug=False):
         return equalizeS(img, debug)
     elif (option == "2"):
         # OCR
-        ocr, img = preprocessing_OCR(img)
-        return ocr,img
+        # OCR
+        # ocr, _ = preprocessing_OCR(img)
+        ocr,img=preprocessing_yasmine_mask(img)
+        return ocr
     elif (option == "3"):
         _, _, img_hand = hand_shadow_based_preprocessing(img, debug)
         return img_hand
@@ -29,8 +31,8 @@ def preprocess_img(img, option, debug=False):
     elif (option == "yasmine"):
         preprocessing_yasmine(img)
     elif (option == "yasmine1"):
-        ocr,image_mask = preprocessing_yasmine_mask(img,debug)
-        return ocr,image_mask
+        _,image_mask = preprocessing_yasmine_mask(img,debug)
+        return image_mask
     elif(option == "yasmine2"):
         image_mask = preprocessing_yasmine_mask_ginger(img, debug)
         return None,image_mask
