@@ -7,8 +7,8 @@ def preprocess_img(img, option, debug=False):
         return equalizeS(img, debug)
     elif (option == "2"):
         # OCR
-        ocr, _ = preprocessing_OCR(img)
-        return ocr
+        ocr, img = preprocessing_OCR(img)
+        return ocr,img
     elif (option == "3"):
         _, _, img_hand = hand_shadow_based_preprocessing(img, debug)
         return img_hand
@@ -17,23 +17,23 @@ def preprocess_img(img, option, debug=False):
         return image_finger
     elif (option == "5"):
         img_grey = Grey_Scale_Preprocessing(img)
-        return img_grey
+        return None,img_grey
     elif (option == "shadow"):
         # BGR image :D
         return remove_shadow_Ycrcb(img)
     elif (option == "ycrcb"):
-        return YCrCb(img)
+        return None,YCrCb(img)
     elif (option == "6"):
         s_channel = sChannelPreprocessing(img)
-        return s_channel
+        return None,s_channel
     elif (option == "yasmine"):
-        return preprocessing_yasmine(img)
+        preprocessing_yasmine(img)
     elif (option == "yasmine1"):
-        image_mask = preprocessing_yasmine_mask(img,debug)
-        return image_mask
+        ocr,image_mask = preprocessing_yasmine_mask(img,debug)
+        return ocr,image_mask
     elif(option == "yasmine2"):
         image_mask = preprocessing_yasmine_mask_ginger(img, debug)
-        return image_mask
+        return None,image_mask
     else:
         print("Wrong Preprocessing Option!!!", option)
         raise TypeError("Wrong Preprocessing Option")
