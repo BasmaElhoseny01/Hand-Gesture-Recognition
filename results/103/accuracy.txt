@@ -1,5 +1,0 @@
-preprocessing_option: yasmine2
-feature_extractor_option: hog
-model_option: both
-RF: 0.6619047619047619
-SVM: 0.7952380952380952

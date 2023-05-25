@@ -1,5 +1,0 @@
-preprocessing_option: 0
-feature_extractor_option: hog
-model_option: both
-RF: 0.7025641025641025
-SVM: 0.764102564102564
