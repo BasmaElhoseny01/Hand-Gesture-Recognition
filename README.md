@@ -10,6 +10,9 @@
 </ul>
 <p>Wait for the classification stage to see our magical touch ✨</p>
 
+[![Total Commits](https://img.shields.io/github/commit-activity/y/BasmaElhoseny01/Hand-Gesture-Recognition?style=flat-square)](https://github.com/BasmaElhoseny01/Hand-Gesture-Recognition)  
+[![GitHub stars](https://img.shields.io/github/stars/BasmaElhoseny01/Hand-Gesture-Recognition?style=flat-square)](https://github.com/BasmaElhoseny01/Hand-Gesture-Recognition)
+
 <br>
 
 ## Preprocessing
