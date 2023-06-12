@@ -1,3 +1,4 @@
+:: Batch file to train model on the data set in ./data_split_resize and get accuracy from the test data set
 :: %1 Preprocessing option
 :: %2 feature extractor option
 :: %3 model Option

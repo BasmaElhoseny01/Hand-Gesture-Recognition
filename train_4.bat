@@ -1,3 +1,5 @@
+@REM Train our Last 4 models
+
 cd .\src\
 py .\train.py 2 OCR both
 cd ..

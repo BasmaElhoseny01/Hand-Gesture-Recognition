@@ -23,8 +23,11 @@ import joblib
 import sys
 import time
 
+
 def test_import():
     print("Hello From utils")
+
+
 def show_images(images, titles=None, save=False, path_save=""):
     """
     This function is used to show image(s) with titles by sending an array of images and an array of associated titles.
@@ -70,10 +73,10 @@ def read_image(path, color_space="RGB"):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
-# Show Histogram of Gray Scale image
+
 def showHist(img):
     """
-    Function to how Histogram of Gray Scale image
+    Function to show Histogram of Gray Scale image
 
     @param path: relative path to the image
     @param color_space:space of in which we want the image
@@ -109,6 +112,7 @@ def read_images_test(path_data_folder, type="train"):
     images = images_men
 
     return images
+
 
 def read_images_train(path_data_folder, debug=False):
     """
@@ -233,22 +237,25 @@ def draw_keypoints(img, keypoints, color=(255), radius=8, thickness=-1):
 
     return img
 
+
 def getGraylevelCounts(image):
     """
         Documentation
     """
-    histImage = histogram(image)  
-    frequency = histImage[0]; bins = histImage[1]
+    histImage = histogram(image)
+    frequency = histImage[0]
+    bins = histImage[1]
     graylevels = np.zeros(256).astype(int)
     counts = np.zeros(256).astype(int)
-    
-    for i in range (0,256):
+
+    for i in range(0, 256):
         graylevels[i] = i
-    
-    for i in range (0,frequency.shape[0]):
+
+    for i in range(0, frequency.shape[0]):
         counts[bins[i]] = frequency[i]
 
-    return counts,graylevels
+    return counts, graylevels
+
 
 def getSegmentedImage(image, threshold):
     """
@@ -259,34 +266,38 @@ def getSegmentedImage(image, threshold):
     segmented_image[segmented_image > threshold] = 255
     return segmented_image
 
+
 def getThreshold(image):
     """
         Documentation
     """
     counter = 0
     image = image.astype(np.uint8)
-    counts,bins = getGraylevelCounts(image)
+    counts, bins = getGraylevelCounts(image)
     cumulativecount = np.cumsum(counts)
     t_old = 0
 
-    threshold = round(np.sum(np.multiply(counts,bins)/cumulativecount[-1]))
+    threshold = round(np.sum(np.multiply(counts, bins)/cumulativecount[-1]))
 
-    while(threshold != t_old):
-        if(counter > 256):
+    while (threshold != t_old):
+        if (counter > 256):
             break
-        counter +=1
+        counter += 1
         t_old = threshold
-        low = list(range(0,t_old))
+        low = list(range(0, t_old))
         high = list(range(t_old+1, 256))
-        t_low = np.sum(np.multiply(counts[0:t_old], low))//cumulativecount[t_old-1]
-        t_high = np.sum(np.multiply(counts[t_old+1:256],high))//(cumulativecount[-1]-cumulativecount[t_old+1])
+        t_low = np.sum(np.multiply(
+            counts[0:t_old], low))//cumulativecount[t_old-1]
+        t_high = np.sum(np.multiply(
+            counts[t_old+1:256], high))//(cumulativecount[-1]-cumulativecount[t_old+1])
         threshold = round((t_low + t_high)//2)
-        # print("old threshold",str(t_old)) 
-        # print("new threshold",str(threshold)) 
+        # print("old threshold",str(t_old))
+        # print("new threshold",str(threshold))
     return threshold
 
-def gammaCorrection(src,gamma):
-    invGamma=1/gamma
-    table=[((i/255)**invGamma)*255 for i in range(256)]
-    table=np.array(table,np.uint8)
-    return cv2.LUT(src,table)
+
+def gammaCorrection(src, gamma):
+    invGamma = 1/gamma
+    table = [((i/255)**invGamma)*255 for i in range(256)]
+    table = np.array(table, np.uint8)
+    return cv2.LUT(src, table)

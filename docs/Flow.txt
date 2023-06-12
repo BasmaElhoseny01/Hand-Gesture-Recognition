@@ -1,9 +1,0 @@
-Segmentation and pre-processing method :
-1.hand can be separated from thebackground image [https://gogulilango.com/software/hand-gesture-recognition-p1]
-2.
-
-Limitations:
-1.Noise
-2.Light Intensity
-3.Hand Size
-4.Hand Acecessories
