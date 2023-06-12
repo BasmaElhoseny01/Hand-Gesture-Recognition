@@ -17,3 +17,4 @@ predata/*/*/*
 !predata/*/*/empty.txt
 
 *.joblib
+!src/test/models/*
