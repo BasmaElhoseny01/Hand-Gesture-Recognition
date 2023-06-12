@@ -1,4 +1,9 @@
-@REM Train our Last 4 models
+::Train our Last 4 models based on OCR and preprocessing choosen
+
+::Remove Old Models
+cd ./models
+del *.joblib
+cd ..
 
 cd .\src\
 py .\train.py 2 OCR both
